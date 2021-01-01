@@ -1,4 +1,4 @@
-#include "C:/Users/Christian/Desktop 2/batchy/batchy.h"
+#include "lib/batchy.h"
 
 BATCHY batchy(200);
 
