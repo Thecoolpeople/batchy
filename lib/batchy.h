@@ -193,6 +193,28 @@ namespace BATCHY_FUNCTIONS{
 	}
 	#endif
 	
+	//Serial
+	#ifdef BATCHY_DEF_SERIAL
+	void SERIAL_INIT(BATCHY &b, unsigned char regReturn){
+		/*
+			serialSpeed: b.batchyReg[1]
+		*/
+		#if defined(__AVR__) || defined(CubeCell_BoardPlus) /*AB02*/
+			uint32_t speed = b.batchyReg[1].byte[0] << 24 | b.batchyReg[1].byte[1] << 16 | b.batchyReg[1].byte[2] << 8 | b.batchyReg[1].byte[3];
+			Serial.begin(speed);
+		#else
+			uint32_t speed = b.batchyReg[1].byte[0] << 24 | b.batchyReg[1].byte[1] << 16 | b.batchyReg[1].byte[2] << 8 | b.batchyReg[1].byte[3];
+			std::cout << "Serial begin with speed " << speed << std::endl;
+		#endif
+	}
+	void SERIAL_WRITE_REG(BATCHY &b, unsigned char regReturn){
+		
+	}
+	void SERIAL_READ_REG(BATCHY &b, unsigned char regReturn){
+		
+	}
+	#endif
+	
 	//I2C
 	#ifdef BATCHY_DEF_I2C
 	
@@ -261,37 +283,20 @@ void BATCHY::call(unsigned char reg, unsigned char* parameter){
 BATCHY::BATCHY(int eepromInternalSize = 1000){
 	clear_register();		//clear_register all
 	
-	internalMap[1] = &BATCHY::clear_register;
-	internalMap[2] = &BATCHY::set_register;
-	internalMap[3] = &BATCHY::add_register;
-	internalMap[4] = &BATCHY::sub_register;
-	internalMap[5] = &BATCHY::mul_register;
-	internalMap[6] = &BATCHY::div_register;
-	internalMap[7] = &BATCHY::push_stack;
-	internalMap[8] = &BATCHY::pop_stack;
-	internalMap[9] = &BATCHY::call;
+	internalMap[BATCHY_CORE_CLEAR_REGISTER] = &BATCHY::clear_register;
+	internalMap[BATCHY_CORE_SET_REGISTER] = &BATCHY::set_register;
+	internalMap[BATCHY_CORE_ADD_REGISTER] = &BATCHY::add_register;
+	internalMap[BATCHY_CORE_SUB_REGISTER] = &BATCHY::sub_register;
+	internalMap[BATCHY_CORE_MUL_REGISTER] = &BATCHY::mul_register;
+	internalMap[BATCHY_CORE_DIV_REGISTER] = &BATCHY::div_register;
+	internalMap[BATCHY_CORE_PUSH_STACK] = &BATCHY::push_stack;
+	internalMap[BATCHY_CORE_POP_STACK] = &BATCHY::pop_stack;
+	internalMap[BATCHY_CORE_CALL] = &BATCHY::call;
 	
 	//BATCHY MAP INIT
 	BATCHYMap[{0,0,0,0}] = BATCHY_FUNCTIONS::tempi;
-	#ifdef BATCHY_DEF_GPIO
-	BATCHYMap[{0,0,0,1}] = BATCHY_FUNCTIONS::GPIO_DIGITAL_MODE;
-	BATCHYMap[{0,0,0,2}] = BATCHY_FUNCTIONS::GPIO_DIGITAL_WRITE;
-	BATCHYMap[{0,0,0,3}] = BATCHY_FUNCTIONS::GPIO_DIGITAL_READ;
-	BATCHYMap[{0,0,0,4}] = BATCHY_FUNCTIONS::GPIO_ANALOG_MODE;
-	BATCHYMap[{0,0,0,5}] = BATCHY_FUNCTIONS::GPIO_ANALOG_WRITE;
-	BATCHYMap[{0,0,0,6}] = BATCHY_FUNCTIONS::GPIO_ANALOG_READ;
-	#endif
 	
-	//timer
-	#ifdef BATCHY_DEF_TIMER
-	BATCHYMap[{0,0,0,10}] = BATCHY_FUNCTIONS::TIMER_SLEEP_MS;
-	BATCHYMap[{0,0,0,11}] = BATCHY_FUNCTIONS::TIMER_SLEEP_US;
-	#endif
-	
-	#ifdef BATCHY_DEF_I2C
-	
-	#endif
-	
+	BATCHY_FUNCTIONS_INIT
 	
 	eepromInternal = new unsigned char[eepromInternalSize];
 	std::memset(eepromInternal, 0, sizeof eepromInternal);
