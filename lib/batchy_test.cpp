@@ -52,11 +52,27 @@ int main(){
 	batchy.runCommand((cmd){4,0,1,2,0,0});
 	printRegister(batchy);
 	//clear 1
-	batchy.runCommand((cmd){1,1,0,0,0,1});
+	batchy.runCommand((cmd){1,1,0,0,0,0});
 	printRegister(batchy);
 	//clear 2
-	batchy.runCommand((cmd){1,2,0,0,0,2});
+	batchy.runCommand((cmd){1,2,0,0,0,0});
 	printRegister(batchy);
+	//clear 0
+	batchy.runCommand((cmd){1,0,0,0,0,0});
+	printRegister(batchy);
+	
+	char cmdstr[] = {
+		2,1,0,0,0,255,
+		2,2,0,0,1,2,
+		3,0,1,2,0,0,
+		4,0,1,2,0,0,
+		1,1,0,0,0,1,
+		1,2,0,0,0,2
+	};
+	batchy.runCommandString(cmdstr, 6*6);
+	printRegister(batchy);
+	
+	
 	//function tempi
 	batchy.runCommand((cmd){9,0,0,0,0,0});
 	printRegister(batchy);

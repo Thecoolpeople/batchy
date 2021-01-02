@@ -70,6 +70,7 @@ class BATCHY{
 		void clear_register();
 		void runCommandLink(cmd& command);
 		void runCommand(cmd command);
+		void runCommandString(char* cmdstr, int length);
 		
 		
 		unsigned char* getInternalEEPROM(int start, int end);
@@ -319,6 +320,13 @@ void BATCHY::runCommandLink(cmd& command){
 }
 void BATCHY::runCommand(cmd command){
 	runCommandLink(command);
+}
+void BATCHY::runCommandString(char* cmdstr, int length){
+	cmd a;
+	for(int i=0; i < length; i+=6){
+		memcpy(a.full, cmdstr+i, 6);
+		runCommandLink(a);
+	}
 }
 
 
