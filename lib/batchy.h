@@ -10,9 +10,23 @@
 #include <map>
 #include <cstring>		//needed for memset
 
-#define RegCount 10
-#define RegSize 4		//4*8 = 32 bit
-#define StackCount 8	//8*4*8 = 256 bit
+/*
+#if RegSize == 1
+
+#elif RegSize == 2
+
+#elif RegSize == 3
+
+#elif RegSize == 4
+
+#endif
+*/
+
+#if RegSize == 2
+	struct uint24_t{
+		uint32_t value:24;
+	};
+#endif
 
 struct cmd_char{
 	unsigned char id;
@@ -24,8 +38,16 @@ union cmd{
 	cmd_char splited;
 };
 union Register{
-	//bool bits[RegSize*8];			//bools not working
 	unsigned char byte[RegSize];
+	#if RegSize == 1
+		uint8_t number;
+	#elif RegSize == 2
+		uint16_t number;
+	#elif RegSize == 3
+		uint24_t number;
+	#elif RegSize == 4
+		uint32_t number;
+	#endif
 };
 struct parameterFunction{
 	unsigned char p1;
@@ -86,75 +108,75 @@ class BATCHY{
 
 namespace BATCHY_FUNCTIONS{
 	void tempi(BATCHY &b, unsigned char regReturn){
-		b.batchyReg[7].byte[3] = 255;
+		b.batchyReg[7].byte[0] = 255;
 	}
 	
 	//GPIO
 	#ifdef BATCHY_DEF_GPIO
 	void GPIO_DIGITAL_MODE(BATCHY &b, unsigned char regReturn){
 		/*
-			pinNR: b.batchyReg[1].byte[3]
-			mode: b.batchReg[2].byte[3]: 0x00=INPUT 0x01=OUTPUT 0x02=INPUT_PULLUP
+			pinNR: b.batchyReg[1].byte[0]
+			mode: b.batchReg[2].byte[0]: 0x00=INPUT 0x01=OUTPUT 0x02=INPUT_PULLUP
 		*/
 		#if defined(__AVR__) || defined(CubeCell_BoardPlus) /*AB02*/
-			if(b.batchyReg[2].byte[3] == 0x00)	//INPUT
-				pinMode(b.batchyReg[1].byte[3], INPUT);
-			else if(b.batchyReg[2].byte[3] == 0x01)	//OUTPUT
-				pinMode(b.batchyReg[1].byte[3], OUTPUT);
-			else if(b.batchyReg[2].byte[3] == 0x02)	//INPUT_PULLUP
-				pinMode(b.batchyReg[1].byte[3], INPUT_PULLUP);
+			if(b.batchyReg[2].byte[0] == 0x00)	//INPUT
+				pinMode(b.batchyReg[1].byte[0], INPUT);
+			else if(b.batchyReg[2].byte[0] == 0x01)	//OUTPUT
+				pinMode(b.batchyReg[1].byte[0], OUTPUT);
+			else if(b.batchyReg[2].byte[0] == 0x02)	//INPUT_PULLUP
+				pinMode(b.batchyReg[1].byte[0], INPUT_PULLUP);
 		//#elif 
 		#else
-			std::cout << "Set Pin " << std::to_string(b.batchyReg[1].byte[3]) << " to mode ";
-			if(b.batchyReg[2].byte[3] == 0x00)	//INPUT
+			std::cout << "Set Pin " << std::to_string(b.batchyReg[1].byte[0]) << " to mode ";
+			if(b.batchyReg[2].byte[0] == 0x00)	//INPUT
 				std::cout << "INPUT" << std::endl;
-			else if(b.batchyReg[2].byte[3] == 0x01)	//OUTPUT
+			else if(b.batchyReg[2].byte[0] == 0x01)	//OUTPUT
 				std::cout << "OUTPUT" << std::endl;
-			else if(b.batchyReg[2].byte[3] == 0x02)	//INPUT_PULLUP
+			else if(b.batchyReg[2].byte[0] == 0x02)	//INPUT_PULLUP
 				std::cout << "INPUT_PULLUP" << std::endl;
 		#endif
 	}
 	void GPIO_DIGITAL_WRITE(BATCHY &b, unsigned char regReturn){
 		/*
-			pinNR: b.batchyReg[1].byte[3]
-			high/low: b.batchReg[2].byte[3] 0x01
+			pinNR: b.batchyReg[1].byte[0]
+			high/low: b.batchReg[2].byte[0] 0x01
 		*/
 		#if defined(__AVR__) || defined(CubeCell_BoardPlus) /*AB02*/
-			digitalWrite(b.batchyReg[1].byte[3], b.batchyReg[2].byte[3]&0x01);
+			digitalWrite(b.batchyReg[1].byte[0], b.batchyReg[2].byte[0]&0x01);
 		//#elif
 		#else
-			std::cout << "Write Pin " << std::to_string(b.batchyReg[1].byte[3]) << " to value " << (b.batchyReg[2].byte[3]&0x01) << std::endl;
+			std::cout << "Write Pin " << std::to_string(b.batchyReg[1].byte[0]) << " to value " << (b.batchyReg[2].byte[0]&0x01) << std::endl;
 		#endif
 	}
 	void GPIO_DIGITAL_READ(BATCHY &b, unsigned char regReturn){
 		/*
-			pinNR: b.batchyReg[1].byte[3]
+			pinNR: b.batchyReg[1].byte[0]
 			regReturn.byte[0]: value
 		*/
 		#if defined(__AVR__) || defined(CubeCell_BoardPlus) /*AB02*/
-			b.batchyReg[1].byte[0] = digitalRead(b.batchyReg[1].byte[3]);
+			b.batchyReg[1].byte[0] = digitalRead(b.batchyReg[1].byte[0]);
 		//#elif
 		#else
-			std::cout << "Read Pin " << std::to_string(b.batchyReg[1].byte[3]) << std::endl;
+			std::cout << "Read Pin " << std::to_string(b.batchyReg[1].byte[0]) << std::endl;
 		#endif
 	}
 	void GPIO_ANALOG_MODE(BATCHY &b, unsigned char regReturn){
 		/*
-			pinNR: b.batchyReg[1].byte[3]
-			mode: b.batchReg[2].byte[3]
+			pinNR: b.batchyReg[1].byte[0]
+			mode: b.batchReg[2].byte[0]
 		*/
 		
 	}
 	void GPIO_ANALOG_WRITE(BATCHY &b, unsigned char regReturn){
 		/*
-			pinNR: b.batchyReg[1].byte[3]
-			value: b.batchReg[2].byte[3]
+			pinNR: b.batchyReg[1].byte[0]
+			value: b.batchReg[2].byte[0]
 		*/
 		
 	}
 	void GPIO_ANALOG_READ(BATCHY &b, unsigned char regReturn){
 		/*
-			pinNR: b.batchyReg[1].byte[3]
+			pinNR: b.batchyReg[1].byte[0]
 			regReturn.byte[0]: value
 		*/
 		
@@ -168,13 +190,10 @@ namespace BATCHY_FUNCTIONS{
 			ms: b.batchyReg[1]
 		*/
 		#if defined(__AVR__) || defined(CubeCell_BoardPlus) /*AB02*/
-			delay(b.batchyReg[1].byte[0]*256*256*256);
-			delay(b.batchyReg[1].byte[1]*256*256);
-			delay(b.batchyReg[1].byte[2]*256);
-			delay(b.batchyReg[1].byte[3]);
+			delay(b.batchyReg[1].number);
 		//#elif
 		#else
-			std::cout << "TIMER SLEEP ms " << std::to_string(b.batchyReg[1].byte[3]) << std::endl;
+			std::cout << "TIMER SLEEP ms " << b.batchyReg[1].number << std::endl;
 		#endif
 	}
 	void TIMER_SLEEP_US(BATCHY &b, unsigned char regReturn){
@@ -182,13 +201,10 @@ namespace BATCHY_FUNCTIONS{
 			us: b.batchyReg[1]
 		*/
 		#if defined(__AVR__) || defined(CubeCell_BoardPlus) /*AB02*/
-			delayMicroseconds(b.batchyReg[1].byte[0]*256*256*256);
-			delayMicroseconds(b.batchyReg[1].byte[1]*256*256);
-			delayMicroseconds(b.batchyReg[1].byte[2]*256);
-			delayMicroseconds(b.batchyReg[1].byte[3]);
+			delayMicroseconds(b.batchyReg[1].number);
 		//#elif
 		#else
-			std::cout << "TIMER SLEEP us " << std::to_string(b.batchyReg[1].byte[3]) << std::endl;
+			std::cout << "TIMER SLEEP us " << b.batchyReg[1].number << std::endl;
 		#endif
 	}
 	#endif
@@ -200,11 +216,9 @@ namespace BATCHY_FUNCTIONS{
 			serialSpeed: b.batchyReg[1]
 		*/
 		#if defined(__AVR__) || defined(CubeCell_BoardPlus) /*AB02*/
-			uint32_t speed = b.batchyReg[1].byte[0] << 24 | b.batchyReg[1].byte[1] << 16 | b.batchyReg[1].byte[2] << 8 | b.batchyReg[1].byte[3];
-			Serial.begin(speed);
+			Serial.begin(b.batchyReg[1].number);
 		#else
-			uint32_t speed = b.batchyReg[1].byte[0] << 24 | b.batchyReg[1].byte[1] << 16 | b.batchyReg[1].byte[2] << 8 | b.batchyReg[1].byte[3];
-			std::cout << "Serial begin with speed " << speed << std::endl;
+			std::cout << "Serial begin with speed " << b.batchyReg[1].number << std::endl;
 		#endif
 	}
 	void SERIAL_WRITE_REG(BATCHY &b, unsigned char regReturn){
@@ -236,28 +250,22 @@ void BATCHY::clear_register(unsigned char reg, unsigned char* a){
 void BATCHY::set_register(unsigned char reg, unsigned char* parameter){
 	if(reg < RegCount){
 		for(int z = 0; z < RegSize; z++)
-			batchyReg[reg].byte[z] = parameter[z];
+			batchyReg[reg].byte[RegSize - 1 - z] = parameter[z];
 	}
 }
 void BATCHY::add_register(unsigned char reg, unsigned char* parameter){	//reg = parameter[0] + parameter[1]
-	char buff = 0;
-	for(int z = RegSize-1; z >= 0; z--){
-		batchyReg[reg].byte[z] = batchyReg[parameter[0]].byte[z] + batchyReg[parameter[1]].byte[z] + buff;
-		buff = batchyReg[reg].byte[z] < (batchyReg[parameter[0]].byte[z] + batchyReg[parameter[1]].byte[z] + buff);
-	}
+	batchyReg[reg].number = batchyReg[parameter[0]].number + batchyReg[parameter[1]].number;
+	//std::cout << batchyReg[parameter[0]].number << " + " << batchyReg[parameter[1]].number << " = " << batchyReg[reg].number << std::endl;
 }
 void BATCHY::sub_register(unsigned char reg, unsigned char* parameter){	//reg = parameter[0] - parameter[1]
-	char buff = 0;
-	for(int z = RegSize-1; z >= 0; z--){
-		batchyReg[reg].byte[z] = batchyReg[parameter[0]].byte[z] - batchyReg[parameter[1]].byte[z] - buff;
-		buff = batchyReg[reg].byte[z] != (batchyReg[parameter[0]].byte[z] - batchyReg[parameter[1]].byte[z] - buff);
-	}
+	batchyReg[reg].number = batchyReg[parameter[0]].number - batchyReg[parameter[1]].number;
+	//std::cout << batchyReg[parameter[0]].number << " - " << batchyReg[parameter[1]].number << " = " << batchyReg[reg].number << std::endl;
 }
-void BATCHY::mul_register(unsigned char reg, unsigned char* parameter){
-	
+void BATCHY::mul_register(unsigned char reg, unsigned char* parameter){	//reg = parameter[0] - parameter[1]
+	batchyReg[reg].number = batchyReg[parameter[0]].number * batchyReg[parameter[1]].number;
 }
 void BATCHY::div_register(unsigned char reg, unsigned char* parameter){
-	
+	batchyReg[reg].number = batchyReg[parameter[0]].number / batchyReg[parameter[1]].number;
 }
 void BATCHY::push_stack(unsigned char reg, unsigned char* parameter){
 	if((batchyStackNr+1) < StackCount){

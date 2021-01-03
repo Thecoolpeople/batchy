@@ -3,6 +3,12 @@
 	comment defines, which you do not need
 */
 
+#define RegCount 10
+#define RegSize 4		//4*8 = 32 bit
+#define StackCount 8	//8*4*8 = 256 bit
+
+
+
 #define BATCHY_DEF_GPIO		//enable GPIO
 #define BATCHY_DEF_TIMER	//enable timer, sleepms,..
 #define BATCHY_DEF_SERIAL	//enable Serial: USART

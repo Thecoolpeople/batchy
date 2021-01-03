@@ -22,7 +22,7 @@ void printRegister(BATCHY &b){
 	Register* reg = b.getRegister();
 	std::cout << "Register Batchy: ";
 	for(int i = 0; i < RegCount; i++){
-		for(int z = 0; z < RegSize; z++){
+		for(int z = RegSize-1; z >= 0; z--){
 			hexcout << std::setfill('0') << std::setw(2) << std::uppercase << std::hex;
 			hexcout << (0xFF & reg[i].byte[z]);
 		}
@@ -36,11 +36,10 @@ int main(){
 	BATCHY batchy;
 	
 	cmd uno = {0,1,0,1};
-	
 		
 	printRegister(batchy);
 	//set 1
-	batchy.runCommand((cmd){2,1,0,0,0,255});
+	batchy.runCommand((cmd){2,1,0,0,0,1});
 	printRegister(batchy);
 	//set 2
 	batchy.runCommand((cmd){2,2,0,0,1,2});
