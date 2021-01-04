@@ -47,7 +47,7 @@ union Register{
 		uint24_t number;
 	#elif RegSize == 4
 		uint32_t number;
-	#endif<
+	#endif
 };
 struct parameterFunction{
 	unsigned char p1;
