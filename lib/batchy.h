@@ -47,7 +47,7 @@ union Register{
 		uint24_t number;
 	#elif RegSize == 4
 		uint32_t number;
-	#endif
+	#endif<
 };
 struct parameterFunction{
 	unsigned char p1;
@@ -72,6 +72,7 @@ class BATCHY{
 		
 		Register batchyStack[StackCount];
 		int batchyStackNr = 0;
+		Register batchyCommandNr;
 		
 		unsigned char* eepromInternal;
 		
@@ -81,9 +82,13 @@ class BATCHY{
 		void sub_register(unsigned char reg, unsigned char* parameter);
 		void mul_register(unsigned char reg, unsigned char* parameter);
 		void div_register(unsigned char reg, unsigned char* parameter);
-		void push_stack(unsigned char reg, unsigned char* parameter);
-		void pop_stack(unsigned char reg, unsigned char* parameter);
+		void push_reg_stack(unsigned char reg, unsigned char* parameter);
+		void pop_reg_stack(unsigned char reg, unsigned char* parameter);
 		void call(unsigned char reg, unsigned char* parameter);
+		void jump(unsigned char reg, unsigned char* parameter);
+		void jal(unsigned char reg, unsigned char* parameter);
+		void jal_return(unsigned char reg, unsigned char* parameter);
+		void core_if(unsigned char reg, unsigned char* parameter);
 		
 	public:
 		BATCHY(int eepromInternalSize);
@@ -92,7 +97,7 @@ class BATCHY{
 		void clear_register();
 		void runCommandLink(cmd& command);
 		void runCommand(cmd command);
-		void runCommandString(char* cmdstr, int length);
+		void runCommandString(char* cmdstr, uint32_t length);
 		
 		
 		unsigned char* getInternalEEPROM(int start, int end);
@@ -221,11 +226,41 @@ namespace BATCHY_FUNCTIONS{
 			std::cout << "Serial begin with speed " << b.batchyReg[1].number << std::endl;
 		#endif
 	}
-	void SERIAL_WRITE_REG(BATCHY &b, unsigned char regReturn){
-		
+	void SERIAL_WRITE_ALL_REG(BATCHY &b, unsigned char regReturn){
+		/*
+			
+		*/
+		#if defined(__AVR__) || defined(CubeCell_BoardPlus) /*AB02*/
+			char buf[RegCount*(RegSize*2+1)+1];
+		    const char * hex = "0123456789ABCDEF";
+		    char pos = 0;
+		    for(char i=0; i < RegCount*RegSize; i++){
+		        buf[pos] =   hex[(b.batchyReg[i/RegSize].byte[RegSize-1-i%RegSize]>>4) & 0xF];
+		        buf[pos+1] = hex[ b.batchyReg[i/RegSize].byte[RegSize-1-i%RegSize]     & 0xF];
+		        if(i%RegSize+1 == RegSize){
+		        	buf[pos+2] = ';';
+		        	pos = pos+3;
+				}else{
+					pos = pos+2;
+				}
+		    }
+		    buf[RegCount*(RegSize*2+1)] = '\n';
+			Serial.write(buf, RegCount*(RegSize*2+1)+1);
+		#else
+			for(int i=0; i < RegCount; i++)
+				std::cout << "Write Register(" << i << "):" << b.batchyReg[i].number << std::endl;
+		#endif
 	}
-	void SERIAL_READ_REG(BATCHY &b, unsigned char regReturn){
-		
+	void SERIAL_READ_ALL_REG(BATCHY &b, unsigned char regReturn){
+		#if defined(__AVR__) || defined(CubeCell_BoardPlus) /*AB02*/
+			//for(int i=0; i < RegCount; i++)
+				//Serial.read(b.batchyReg[i].number);
+		#else
+			for(int i=0; i < RegCount; i++){
+				std::cout << "Read Register(" << i << "):";
+				std:: cin >> b.batchyReg[i].number;
+			}
+		#endif
 	}
 	#endif
 	
@@ -239,27 +274,22 @@ namespace BATCHY_FUNCTIONS{
 //core functions
 void BATCHY::clear_register(){
 	for(int i = 0; i < RegCount; i++)
-		for(int z = 0; z < RegSize; z++)
-			batchyReg[i].byte[z] = 0;
+		batchyReg[i].number = 0;
 }
 void BATCHY::clear_register(unsigned char reg, unsigned char* a){
 	if(reg < RegCount)
-		for(int z = 0; z < RegSize; z++)
-			batchyReg[reg].byte[z] = 0;
+		batchyReg[reg].number = 0;
 }
 void BATCHY::set_register(unsigned char reg, unsigned char* parameter){
 	if(reg < RegCount){
-		for(int z = 0; z < RegSize; z++)
-			batchyReg[reg].byte[RegSize - 1 - z] = parameter[z];
+		memcpy(batchyReg[reg].byte, parameter, RegSize);
 	}
 }
 void BATCHY::add_register(unsigned char reg, unsigned char* parameter){	//reg = parameter[0] + parameter[1]
 	batchyReg[reg].number = batchyReg[parameter[0]].number + batchyReg[parameter[1]].number;
-	//std::cout << batchyReg[parameter[0]].number << " + " << batchyReg[parameter[1]].number << " = " << batchyReg[reg].number << std::endl;
 }
 void BATCHY::sub_register(unsigned char reg, unsigned char* parameter){	//reg = parameter[0] - parameter[1]
 	batchyReg[reg].number = batchyReg[parameter[0]].number - batchyReg[parameter[1]].number;
-	//std::cout << batchyReg[parameter[0]].number << " - " << batchyReg[parameter[1]].number << " = " << batchyReg[reg].number << std::endl;
 }
 void BATCHY::mul_register(unsigned char reg, unsigned char* parameter){	//reg = parameter[0] - parameter[1]
 	batchyReg[reg].number = batchyReg[parameter[0]].number * batchyReg[parameter[1]].number;
@@ -267,16 +297,16 @@ void BATCHY::mul_register(unsigned char reg, unsigned char* parameter){	//reg = 
 void BATCHY::div_register(unsigned char reg, unsigned char* parameter){
 	batchyReg[reg].number = batchyReg[parameter[0]].number / batchyReg[parameter[1]].number;
 }
-void BATCHY::push_stack(unsigned char reg, unsigned char* parameter){
+void BATCHY::push_reg_stack(unsigned char reg, unsigned char* parameter){
 	if((batchyStackNr+1) < StackCount){
-		for(int z = 0; z < RegSize; z++)
-			batchyStack[batchyStackNr].byte[z] = parameter[z];
+		batchyStack[batchyStackNr].number = batchyReg[parameter[0]].number;
 		batchyStackNr += 1;
 	}
 }
-void BATCHY::pop_stack(unsigned char reg, unsigned char* parameter){
+void BATCHY::pop_reg_stack(unsigned char reg, unsigned char* parameter){
 	if(batchyStackNr > 0){
 		batchyStackNr -= 1;
+		batchyReg[parameter[0]].number = batchyStack[batchyStackNr].number;
 	}
 }
 void BATCHY::call(unsigned char reg, unsigned char* parameter){
@@ -285,6 +315,20 @@ void BATCHY::call(unsigned char reg, unsigned char* parameter){
     if (x != BATCHYMap.end()) {
         (*(x->second))(*this, reg);
     }
+}
+void BATCHY::jump(unsigned char reg, unsigned char* parameter){
+	memcpy(batchyCommandNr.byte, parameter, RegSize);
+}
+void BATCHY::jal(unsigned char reg, unsigned char* parameter){	//jump and link
+	//push_stack()
+	
+	//memcpy(batchyCommandNr.byte, parameter, RegSize);
+}
+void BATCHY::jal_return(unsigned char reg, unsigned char* parameter){	//jump and link back
+	//memcpy: batchyCommandNr.byte <- pop_stack()
+}
+void BATCHY::core_if(unsigned char reg, unsigned char* parameter){
+	
 }
 
 //public functions
@@ -297,9 +341,13 @@ BATCHY::BATCHY(int eepromInternalSize = 1000){
 	internalMap[BATCHY_CORE_SUB_REGISTER] = &BATCHY::sub_register;
 	internalMap[BATCHY_CORE_MUL_REGISTER] = &BATCHY::mul_register;
 	internalMap[BATCHY_CORE_DIV_REGISTER] = &BATCHY::div_register;
-	internalMap[BATCHY_CORE_PUSH_STACK] = &BATCHY::push_stack;
-	internalMap[BATCHY_CORE_POP_STACK] = &BATCHY::pop_stack;
+	internalMap[BATCHY_CORE_PUSH_REG_STACK] = &BATCHY::push_reg_stack;
+	internalMap[BATCHY_CORE_POP_REG_STACK] = &BATCHY::pop_reg_stack;
 	internalMap[BATCHY_CORE_CALL] = &BATCHY::call;
+	internalMap[BATCHY_CORE_JUMP] = &BATCHY::jump;
+	internalMap[BATCHY_CORE_JAL] = &BATCHY::jal;
+	internalMap[BATCHY_CORE_JAL_RETURN] = &BATCHY::jal_return;
+	internalMap[BATCHY_CORE_CORE_IF] = &BATCHY::core_if;
 	
 	//BATCHY MAP INIT
 	BATCHYMap[{0,0,0,0}] = BATCHY_FUNCTIONS::tempi;
@@ -315,11 +363,13 @@ BATCHY::~BATCHY(){
 
 unsigned char* BATCHY::getInternalEEPROM(int start, int end){
 	unsigned char value[end-start+1];
+	//memcpy(value, (*eepromInternal)+start, end-start+1);	--> TODO Test
 	for(int i=start; i<=end; i++)
 		value[i-start] = eepromInternal[i];
 	return value;
 }
 void BATCHY::setInternalEEPROM(int start, int end, unsigned char* value){
+	//memcpy((*eepromInternal)+start, value, end-start+1);	--> TODO Test
 	for(int i=start; i<=end; i++)
 		eepromInternal[i] = value[i-start];
 }
@@ -334,10 +384,11 @@ void BATCHY::runCommandLink(cmd& command){
 void BATCHY::runCommand(cmd command){
 	runCommandLink(command);
 }
-void BATCHY::runCommandString(char* cmdstr, int length){
+void BATCHY::runCommandString(char* cmdstr, uint32_t length){
+	
 	cmd a;
-	for(int i=0; i < length; i+=6){
-		memcpy(a.full, cmdstr+i, 6);
+	for(batchyCommandNr.number = 0; batchyCommandNr.number < length; batchyCommandNr.number+=6){
+		memcpy(a.full, cmdstr+batchyCommandNr.number, 6);
 		runCommandLink(a);
 	}
 }

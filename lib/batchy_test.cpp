@@ -39,10 +39,10 @@ int main(){
 		
 	printRegister(batchy);
 	//set 1
-	batchy.runCommand((cmd){2,1,0,0,0,1});
+	batchy.runCommand((cmd){2,1,1,0,0,0});
 	printRegister(batchy);
 	//set 2
-	batchy.runCommand((cmd){2,2,0,0,1,2});
+	batchy.runCommand((cmd){2,2,2,1,0,0});
 	printRegister(batchy);
 	//add_register
 	batchy.runCommand((cmd){3,0,1,2,0,0});
@@ -61,12 +61,12 @@ int main(){
 	printRegister(batchy);
 	
 	char cmdstr[] = {
-		2,1,0,0,0,255,
-		2,2,0,0,1,2,
-		3,0,1,2,0,0,
-		4,0,1,2,0,0,
-		1,1,0,0,0,1,
-		1,2,0,0,0,2
+		2,1,255,0,0,0,	//set 1
+		2,2,2,1,0,0,	//set 2
+		3,0,1,2,0,0,	//add_register
+		4,0,1,2,0,0,	//sub_register
+		1,1,0,0,0,0,	//clear 1
+		1,2,0,0,0,0		//clear 0
 	};
 	batchy.runCommandString(cmdstr, 6*6);
 	printRegister(batchy);
@@ -77,9 +77,9 @@ int main(){
 	printRegister(batchy);
 	
 	//function GPIO digital mode
-	batchy.runCommand((cmd){2,1,0,0,0,1});	//set reg1 = 1
-	batchy.runCommand((cmd){2,2,0,0,0,1});	//set reg2 = 1
-	batchy.runCommand((cmd){9,0,0,0,0,1});
+	batchy.runCommand((cmd){2,1,1,0,0,1});	//set reg1 = 1
+	batchy.runCommand((cmd){2,2,1,0,0,1});	//set reg2 = 1
+	batchy.runCommand((cmd){9,0,1,0,0,1});
 	printRegister(batchy);
 	//function GPIO digital set
 	batchy.runCommand((cmd){9,0,0,0,0,2});

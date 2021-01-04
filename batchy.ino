@@ -4,37 +4,43 @@ BATCHY batchy(200);
 
 void setup() {
   const char cmdstr[] = {
-    2,1,0,0,0,255,    //set 1
-    2,2,0,0,0,2,      //set 2
-    3,0,1,2,0,0,      //add_register
-    4,0,1,2,0,0,      //sub_register
-    1,1,0,0,0,1,      //clear 1
-    1,2,0,0,0,2,      //clear 2
+    2,1,255,0,0,0,  //set 1
+    2,2,2,1,0,0,  //set 2
+    3,0,1,2,0,0,  //add_register
+    4,0,1,2,0,0,  //sub_register
+    1,1,0,0,0,0,  //clear 1
+    1,2,0,0,0,0,   //clear 0
 
     //function GPIO digital mode
-    2,1,0,0,0,4,      //set reg1 = 4
-    2,2,0,0,0,1,      //set reg2 = 1
-    9,0,0,0,0,1       //set pin D4 to output
+    2,1,4,0,0,0,      //set reg1 = 4
+    2,2,1,0,0,0,      //set reg2 = 1
+    9,0,0,0,0,1,      //set pin D4 to output
+
+    //setup serial
+    2,1,128,37,1,0,   //serial Speed 74880
+    9,0,0,0,0,12      //init serial
   };
-  batchy.runCommandString(cmdstr, 9*6);
+  batchy.runCommandString(cmdstr, sizeof(cmdstr));
 }
 
 const char cmdstrHigh[] = {
-  2,1,0,0,0,4,    //set reg1 = 4
-  2,2,0,0,0,1,    //set reg2 = 1
+  2,1,4,0,0,0,    //set reg1 = 4
+  2,2,1,0,0,0,    //set reg2 = 1
   9,0,0,0,0,2,    //function GPIO digital set HIGH
-  2,1,0,0,0,250,  //set reg1 = 250
-  9,0,0,0,0,10    //delay
+  2,1,250,0,0,0,  //set reg1 = 250
+  9,0,0,0,0,10,   //delay
+  9,0,0,0,0,13    //serial Write Register
 };
 const char cmdstrLow[] = {
-  2,1,0,0,0,4,    //set reg1 = 4
+  2,1,4,0,0,0,    //set reg1 = 4
   2,2,0,0,0,0,    //set reg2 = 0
   9,0,0,0,0,2,    //function GPIO digital set LOW
-  2,1,0,0,0,250,  //set reg1 = 250
-  9,0,0,0,0,10    //delay
+  2,1,250,0,0,0,  //set reg1 = 250
+  9,0,0,0,0,10,   //delay
+  9,0,0,0,0,13    //serial Write Register
 };
 
 void loop() {
-  batchy.runCommandString(cmdstrHigh, 5*6); //High
-  batchy.runCommandString(cmdstrLow, 5*6); //Low
+  batchy.runCommandString(cmdstrHigh,sizeof(cmdstrHigh)); //High
+  batchy.runCommandString(cmdstrLow, sizeof(cmdstrLow)); //Low
 }

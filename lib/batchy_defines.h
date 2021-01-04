@@ -22,9 +22,13 @@
 #define BATCHY_CORE_SUB_REGISTER   4
 #define BATCHY_CORE_MUL_REGISTER   5
 #define BATCHY_CORE_DIV_REGISTER   6
-#define BATCHY_CORE_PUSH_STACK     7
-#define BATCHY_CORE_POP_STACK      8
+#define BATCHY_CORE_PUSH_REG_STACK 7
+#define BATCHY_CORE_POP_REG_STACK  8
 #define BATCHY_CORE_CALL           9
+#define BATCHY_CORE_JUMP           10
+#define BATCHY_CORE_JAL            11
+#define BATCHY_CORE_JAL_RETURN     12
+#define BATCHY_CORE_CORE_IF        13
 
 //batchy define functions
 #define pushfoo _Pragma("push_macro(\"BATCHY_FUNCTIONS_INIT\")") //for convenience
@@ -58,7 +62,9 @@
 	pushfoo
 	#undef BATCHY_FUNCTIONS_INIT
 	#define BATCHY_FUNCTIONS_INIT popfoo BATCHY_FUNCTIONS_INIT \
-		BATCHYMap[{0,0,0,12}] = BATCHY_FUNCTIONS::TIMER_SLEEP_US;
+		BATCHYMap[{0,0,0,12}] = BATCHY_FUNCTIONS::SERIAL_INIT; \
+		BATCHYMap[{0,0,0,13}] = BATCHY_FUNCTIONS::SERIAL_WRITE_ALL_REG; \
+		BATCHYMap[{0,0,0,14}] = BATCHY_FUNCTIONS::SERIAL_READ_ALL_REG;
 #endif
 
 //I2C
