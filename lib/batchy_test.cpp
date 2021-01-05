@@ -68,7 +68,7 @@ int main(){
 		1,1,0,0,0,0,	//clear 1
 		1,2,0,0,0,0		//clear 0
 	};
-	batchy.runCommandString(cmdstr, 6*6);
+	batchy.runCommandString(cmdstr, sizeof(cmdstr));
 	printRegister(batchy);
 	
 	

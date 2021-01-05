@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>BATCHY Compiler</title>
+	
+	<script src="lib/cparse.js"></script>
+	<script src="compiler.js"></script>
+</head>
+
+<body>
+	<table border="1" width="100%">
+		<tr>
+			<th>C code</th>
+			<th>C ast <button onclick="astGenerate()">generate</button></th>
+			<th>Bytecode <button onclick="bytecodeGenerate()">generate</button></th>
+			
+		</tr>
+		<tr>
+			<td valign="top" id="Ccode" width="33%" contenteditable="true">void main(){<br>int answer = 6 * 7;<br>}</td>
+			<td valign="top" id="Cast" width="33%"></td>
+			<td valign="top" id="Cbytecode" width="33%"></td>
+		</tr>
+	</table>
+</body>
