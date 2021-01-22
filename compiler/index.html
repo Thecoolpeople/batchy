@@ -18,7 +18,7 @@
 			
 		</tr>
 		<tr>
-			<td valign="top" id="Ccode" width="33%" contenteditable="true">void main(){<br>gpio.digital.mode(4,1);<br>gpio.digital.write(4,1);<br>}</td>
+			<td valign="top" id="Ccode" width="33%" contenteditable="true">void setup(){<br>gpio.digital.mode(4,1);<br>}<br><br>void main(){<br>gpio.digital.write(4,1); //set to high<br>delay.ms(1000);<br>gpio.digital.write(4,0); //set to low<br>delay.ms(1000);<br>}</td>
 			<td valign="top" id="Cast" width="33%"></td>
 			<td valign="top" id="Cbytecode" width="33%"></td>
 		</tr>

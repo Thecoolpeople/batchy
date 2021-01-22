@@ -67,15 +67,17 @@ function bytecodeGenerate(){
 	document.getElementById("Cbytecode").innerText = JSON.stringify(full_bc)
 }
 
+let intTo4 = function(value){
+	return [value&0xFF, (value>>8)&0xFF, (value>>16)&0xFF, (value>>24)&0xFF]
+}
 let lookupFuncs = {
 	"gpio.digital.mode": function(arg){
 		if(arg.length != 2){
 			alert("gpio.digital.mode needs 2 arguments: (PIN, VALUE)")
 			return []
 		}
-		let a = [
-			2,1,arg[0].value,0,0,0,
-			2,2,arg[1].value,0,0,0]
+		let a = [2,1].concat(intTo4(arg[0].value))
+		a = a.concat([2,2]).concat(intTo4(arg[1].value))
 		let c = [9,0,1,0,0,0]
 		return [].concat(a,c)
 	},
@@ -84,9 +86,8 @@ let lookupFuncs = {
 			alert("gpio.digital.write needs 2 arguments: (PIN, VALUE)")
 			return []
 		}
-		let a = [
-			2,1,arg[0].value,0,0,0,
-			2,2,arg[1].value,0,0,0]
+		let a = [2,1].concat(intTo4(arg[0].value))
+		a = a.concat([2,2]).concat(intTo4(arg[1].value))
 		let c = [9,0,2,0,0,0]
 		return [].concat(a,c)
 	},
@@ -95,9 +96,8 @@ let lookupFuncs = {
 			alert("gpio.digital.read needs 2 arguments: (PIN, VALUE)")
 			return []
 		}
-		let a = [
-			2,1,arg[0].value,0,0,0,
-			2,2,arg[1].value,0,0,0]
+		let a = [2,1].concat(intTo4(arg[0].value))
+		a = a.concat([2,2]).concat(intTo4(arg[1].value))
 		let c = [9,0,3,0,0,0]
 		return [].concat(a,c)
 	},
@@ -107,6 +107,7 @@ let lookupFuncs = {
 			return []
 		}
 		let c = [9,0,4,0,0,0]
+		return []
 	},
 	"gpio.analog.write": function(arg){
 		if(arg.length != 2){
@@ -114,6 +115,7 @@ let lookupFuncs = {
 			return []
 		}
 		let c = [9,0,5,0,0,0]
+		return []
 	},
 	"gpio.analog.read": function(arg){
 		if(arg.length != 2){
@@ -121,5 +123,24 @@ let lookupFuncs = {
 			return []
 		}
 		let c = [9,0,6,0,0,0]
+		return []
+	},
+	"delay.ms": function(arg){
+		if(arg.length != 1){
+			alert("delay.ms needs 1 arguments: (VALUE)")
+			return []
+		}
+		let a = [2,1].concat(intTo4(arg[0].value))
+		let c = [9,0,10,0,0,0]
+		return [].concat(a,c)
+	},
+	"delay.us": function(arg){
+		if(arg.length != 1){
+			alert("delay.us needs 1 arguments: (VALUE)")
+			return []
+		}
+		let a = [2,1].concat(intTo4(arg[0].value))
+		let c = [9,0,11,0,0,0]
+		return [].concat(a,c)
 	}
 }
