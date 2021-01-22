@@ -29,7 +29,7 @@
 #define BATCHY_CORE_JAL            11
 #define BATCHY_CORE_JAL_RETURN     12
 #define BATCHY_CORE_CORE_IF        13
-#define BATCHY_CORE_MAX 14		//must be set to (maximal nr of function + 1)
+#define BATCHY_CORE_MAX 14		//must be set to (maximal nr of functions + 1)
 
 //batchy define functions
 #define pushfoo _Pragma("push_macro(\"BATCHY_FUNCTIONS_INIT\")") //for convenience
@@ -74,3 +74,5 @@
 	#undef BATCHY_FUNCTIONS_INIT
 	#define BATCHY_FUNCTIONS_INIT popfoo BATCHY_FUNCTIONS_INIT
 #endif
+
+#define BATCHYArrayMax 15		//must be set to (maximal nr of functions + 1)
