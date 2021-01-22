@@ -77,15 +77,15 @@ int main(){
 	printRegister(batchy);
 	
 	//function GPIO digital mode
-	batchy.runCommand((cmd){2,1,1,0,0,1});	//set reg1 = 1
-	batchy.runCommand((cmd){2,2,1,0,0,1});	//set reg2 = 1
-	batchy.runCommand((cmd){9,0,1,0,0,1});
+	batchy.runCommand((cmd){2,1,1,0,0,0});	//set reg1 = 1
+	batchy.runCommand((cmd){2,2,1,0,0,0});	//set reg2 = 1
+	batchy.runCommand((cmd){9,0,1,0,0,0});
 	printRegister(batchy);
 	//function GPIO digital set
-	batchy.runCommand((cmd){9,0,0,0,0,2});
+	batchy.runCommand((cmd){9,0,2,0,0,0});
 	printRegister(batchy);
 	//function GPIO digital read
-	batchy.runCommand((cmd){9,0,0,0,0,3});
+	batchy.runCommand((cmd){9,0,3,0,0,0});
 	printRegister(batchy);
 	
 	getchar();

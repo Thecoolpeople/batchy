@@ -3,13 +3,6 @@
 
 #include "batchy_defines.h"
 
-#if defined(__AVR__)
-#include <ArduinoSTL.h>
-#endif
-
-#include <map>
-#include <cstring>		//needed for memset
-
 /*
 #if RegSize == 1
 
@@ -104,8 +97,7 @@ class BATCHY{
 		Register batchyReg[RegCount];
 		
 		typedef void (*FnPtrBATCHY)(BATCHY&, unsigned char);
-		typedef std::map<parameterFunction, FnPtrBATCHY> BATCHYMapDef;
-		BATCHYMapDef BATCHYMap;
+		FnPtrBATCHY BATCHYArray[BATCHYArrayMax];
 };
 
 
@@ -150,11 +142,8 @@ void BATCHY::pop_reg_stack(unsigned char reg, unsigned char* parameter){
 	}
 }
 void BATCHY::call(unsigned char reg, unsigned char* parameter){
-	BATCHYMapDef::iterator x = BATCHYMap.find({parameter[0], parameter[1], parameter[2], parameter[3]});
-	
-    if (x != BATCHYMap.end()) {
-        (*(x->second))(*this, reg);
-    }
+	Register a = {parameter[0], parameter[1], parameter[2], parameter[3]};
+	(BATCHYArray[a.number])(*this, reg);
 }
 void BATCHY::jump(unsigned char reg, unsigned char* parameter){
 	memcpy(batchyCommandNr.byte, parameter, RegSize);
@@ -191,12 +180,13 @@ BATCHY::BATCHY(int eepromInternalSize = 1000){
 	internalArray[BATCHY_CORE_CORE_IF] = &BATCHY::core_if;
 	
 	//BATCHY MAP INIT
-	BATCHYMap[{0,0,0,0}] = BATCHY_FUNCTIONS::tempi;
+	BATCHYArray[0] = BATCHY_FUNCTIONS::tempi;
 	
 	BATCHY_FUNCTIONS_INIT
 	
 	eepromInternal = new unsigned char[eepromInternalSize];
-	std::memset(eepromInternal, 0, sizeof eepromInternal);
+	for(int i=0; i < sizeof eepromInternal; i++)
+		eepromInternal[i] = 0;
 }
 BATCHY::~BATCHY(){
 	delete[] eepromInternal;
@@ -204,13 +194,11 @@ BATCHY::~BATCHY(){
 
 unsigned char* BATCHY::getInternalEEPROM(int start, int end){
 	unsigned char value[end-start+1];
-	//memcpy(value, (*eepromInternal)+start, end-start+1);	--> TODO Test
 	for(int i=start; i<=end; i++)
 		value[i-start] = eepromInternal[i];
 	return value;
 }
 void BATCHY::setInternalEEPROM(int start, int end, unsigned char* value){
-	//memcpy((*eepromInternal)+start, value, end-start+1);	--> TODO Test
 	for(int i=start; i<=end; i++)
 		eepromInternal[i] = value[i-start];
 }
@@ -222,7 +210,6 @@ void BATCHY::runCommand(cmd command){
 	runCommandLink(command);
 }
 void BATCHY::runCommandString(char* cmdstr, uint32_t length){
-	
 	cmd a;
 	for(batchyCommandNr.number = 0; batchyCommandNr.number < length; batchyCommandNr.number+=6){
 		memcpy(a.full, cmdstr+batchyCommandNr.number, 6);
