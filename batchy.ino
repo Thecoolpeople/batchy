@@ -20,7 +20,7 @@ void setup() {
     2,1,128,37,1,0,   //serial Speed 74880
     9,0,12,0,0,      //init serial
   };
-  batchy.runCommandString(cmdstr, sizeof(cmdstr));
+  batchy.runCommandString((char*)cmdstr, sizeof(cmdstr));
 }
 
 const char cmdstrHigh[] = {
@@ -41,6 +41,6 @@ const char cmdstrLow[] = {
 };
 
 void loop() {
-  batchy.runCommandString(cmdstrHigh,sizeof(cmdstrHigh)); //High
-  batchy.runCommandString(cmdstrLow, sizeof(cmdstrLow)); //Low
+  batchy.runCommandString((char*)cmdstrHigh,sizeof(cmdstrHigh)); //High
+  batchy.runCommandString((char*)cmdstrLow, sizeof(cmdstrLow)); //Low
 }

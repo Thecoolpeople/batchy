@@ -135,7 +135,11 @@ namespace BATCHY_FUNCTIONS{
 				}
 		    }
 		    buf[RegCount*(RegSize*2+1)] = '\n';
-			Serial.write(buf, RegCount*(RegSize*2+1)+1);
+		    #if defined(CubeCell_BoardPlus)
+		    	Serial.write((const unsigned char*)buf, RegCount*(RegSize*2+1)+1);
+		    #else
+		    	Serial.write(buf, RegCount*(RegSize*2+1)+1);
+		    #endif
 		#else
 			for(int i=0; i < RegCount; i++)
 				std::cout << "Write Register(" << i << "):" << b.batchyReg[i].number << std::endl;
