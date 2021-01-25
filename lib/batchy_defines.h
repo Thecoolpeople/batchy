@@ -14,23 +14,6 @@
 #define BATCHY_DEF_SERIAL	//enable Serial: USART
 #define BATCHY_DEF_I2C		//enable I2C
 
-
-//internal core functions
-#define BATCHY_CORE_CLEAR_REGISTER 1
-#define BATCHY_CORE_SET_REGISTER   2
-#define BATCHY_CORE_ADD_REGISTER   3
-#define BATCHY_CORE_SUB_REGISTER   4
-#define BATCHY_CORE_MUL_REGISTER   5
-#define BATCHY_CORE_DIV_REGISTER   6
-#define BATCHY_CORE_PUSH_REG_STACK 7
-#define BATCHY_CORE_POP_REG_STACK  8
-#define BATCHY_CORE_CALL           9
-#define BATCHY_CORE_JUMP           10
-#define BATCHY_CORE_JAL            11
-#define BATCHY_CORE_JAL_RETURN     12
-#define BATCHY_CORE_CORE_IF        13
-#define BATCHY_CORE_MAX 14		//must be set to (maximal nr of functions + 1)
-
 //batchy define functions
 #define pushfoo _Pragma("push_macro(\"BATCHY_FUNCTIONS_INIT\")") //for convenience
 #define popfoo  _Pragma("pop_macro(\"BATCHY_FUNCTIONS_INIT\")")
@@ -64,8 +47,8 @@
 	#undef BATCHY_FUNCTIONS_INIT
 	#define BATCHY_FUNCTIONS_INIT popfoo BATCHY_FUNCTIONS_INIT \
 		BATCHYArray[12] = BATCHY_FUNCTIONS::SERIAL_INIT; \
-		BATCHYArray[13] = BATCHY_FUNCTIONS::SERIAL_WRITE_ALL_REG; \
-		BATCHYArray[14] = BATCHY_FUNCTIONS::SERIAL_READ_ALL_REG;
+		BATCHYArray[13] = BATCHY_FUNCTIONS::SERIAL_GET_ALL_REG; \
+		BATCHYArray[14] = BATCHY_FUNCTIONS::SERIAL_SET_ALL_REG;
 #endif
 
 //I2C

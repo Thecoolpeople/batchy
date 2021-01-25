@@ -64,6 +64,7 @@ int main(){
 		2,1,255,0,0,0,	//set 1
 		2,2,2,1,0,0,	//set 2
 		3,0,1,2,0,0,	//add_register
+		9,0,13,0,0,0,	//show all registers
 		4,0,1,2,0,0,	//sub_register
 		1,1,0,0,0,0,	//clear 1
 		1,2,0,0,0,0		//clear 0

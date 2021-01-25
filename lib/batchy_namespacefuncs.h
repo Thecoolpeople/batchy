@@ -116,7 +116,7 @@ namespace BATCHY_FUNCTIONS{
 			std::cout << "Serial begin with speed " << b.batchyReg[1].number << std::endl;
 		#endif
 	}
-	void SERIAL_WRITE_ALL_REG(BATCHY &b, unsigned char regReturn){
+	void SERIAL_GET_ALL_REG(BATCHY &b, unsigned char regReturn){
 		/*
 			
 		*/
@@ -141,11 +141,13 @@ namespace BATCHY_FUNCTIONS{
 		    	Serial.write(buf, RegCount*(RegSize*2+1)+1);
 		    #endif
 		#else
+			std::cout << "Register Batchy: ";
 			for(int i=0; i < RegCount; i++)
-				std::cout << "Write Register(" << i << "):" << b.batchyReg[i].number << std::endl;
+				std::cout << b.batchyReg[i].number << " ";
+			std::cout << std::endl;
 		#endif
 	}
-	void SERIAL_READ_ALL_REG(BATCHY &b, unsigned char regReturn){
+	void SERIAL_SET_ALL_REG(BATCHY &b, unsigned char regReturn){
 		#if defined(__AVR__) || defined(CubeCell_BoardPlus) /*AB02*/
 			//for(int i=0; i < RegCount; i++)
 				//Serial.read(b.batchyReg[i].number);
