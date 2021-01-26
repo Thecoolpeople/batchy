@@ -39,3 +39,16 @@ const char cmdstr[] = {
 };
 batchy.runCommandString((char*)cmdstr, sizeof(cmdstr));
 ```
+
+## compiler
+The compiler works quite simple. just open the index.html with your favourite browser.
+- put you code in the code tap
+- click on C ast->generate
+- click on Bytecode->generate
+then you will get the Bytecode for direct use in batchy
+
+## license
+MIT License
+
+## contribution
+just fork the repository and create a pull request or create an issue and put your idea in there
