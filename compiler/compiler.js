@@ -64,7 +64,29 @@ function bytecodeGenerate(){
 		console.log(">function", type, name)
 		full_bc[name] = bodyParse(func.body)
 	})
-	document.getElementById("Cbytecode").innerText = JSON.stringify(full_bc)
+	document.getElementById("Cbytecode").innerHTML = ""
+	let pad = function(num, size) {
+		num = num.toString();
+		while (num.length < size) num = "0" + num;
+		return num;
+	}
+	for(k in full_bc){
+		document.getElementById("Cbytecode").innerHTML += '<h3>'+k+'</h3>'
+		for(let i=0;i<full_bc[k].length; i++){
+			document.getElementById("Cbytecode").innerHTML += pad(full_bc[k][i],3)+", "
+			if((i+1) % 6 == 0)
+				document.getElementById("Cbytecode").innerHTML += '<br>'
+		}
+	}
+	JSON.stringify(full_bc)
+}
+
+let allFunctionsShow = function(){
+	let f = ""
+	for(k in lookupFuncs){
+		f += k + '<br>'
+	}
+	document.getElementById("allFunctions").innerHTML = f
 }
 
 let intTo4 = function(value){

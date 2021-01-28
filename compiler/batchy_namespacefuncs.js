@@ -84,7 +84,7 @@ let lookupFuncs = {
 		
 		let a = [2,1].concat(intTo4(arg[0].value))
 		let c = [9,0,12,0,0,0]
-		return [].concat(c, a)
+		return [].concat(a, c)
 	},
 	"serial.writeAllRegister": function(arg){
 		if(arg.length != 1){

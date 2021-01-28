@@ -10,8 +10,9 @@
 	<script src="batchy_namespacefuncs.js"></script>
 </head>
 
-<body>
-	<table border="1" width="100%">
+<body onload="allFunctionsShow()">
+	<h1>Compiler</h1>
+	<table border="1"width="100%">
 		<tr>
 			<th>C code</th>
 			<th style="overflow:scroll">C ast <button onclick="astGenerate()">generate</button></th>
@@ -19,9 +20,12 @@
 			
 		</tr>
 		<tr>
-			<td valign="top" id="Ccode" width="33%" contenteditable="true">void setup(){<br>gpio.digital.mode(4,1);<br>}<br><br>void main(){<br>gpio.digital.write(4,1); //set to high<br>delay.ms(1000);<br>gpio.digital.write(4,0); //set to low<br>delay.ms(1000);<br>}</td>
-			<td valign="top" id="Cast" width="33%"></td>
-			<td valign="top" id="Cbytecode" width="33%"></td>
+			<td valign="top" width="33%"><div contenteditable="true" id="Ccode" style="height:85vh; width:100%; overflow:scroll;">void setup(){<br>gpio.digital.mode(4,1);<br>}<br><br>void main(){<br>gpio.digital.write(4,1); //set to high<br>delay.ms(1000);<br>gpio.digital.write(4,0); //set to low<br>delay.ms(1000);<br>}</div></td>
+			<td valign="top" width="33%"><div id="Cast" style="height:85vh; width:100%; overflow:scroll;"></div></td>
+			<td valign="top" width="33%"><div id="Cbytecode" style="height:85vh; width:100%; overflow:scroll;"></div></td>
 		</tr>
 	</table>
+
+	<h1>Available Functions</h1>
+	<p id="allFunctions"></p>
 </body>
