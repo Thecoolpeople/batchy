@@ -17,7 +17,8 @@ void setup() {
     9,0,1,0,0,0,      //set pin D4 to output
 
     //setup serial
-    2,1,128,37,1,0,   //serial Speed 74880
+    //2,1,128,37,1,0,   //serial Speed 74880
+    002, 001, 000, 194, 001, 000, //serial Speed 115200
     9,0,12,0,0,      //init serial
   };
   batchy.runCommandString((char*)cmdstr, sizeof(cmdstr));

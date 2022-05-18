@@ -104,7 +104,7 @@ inline void BATCHY::runCommandLink(cmd& command){
 			for(int i = 0; i < RegCount; i++)
 				batchyReg[i].number = 0;
 			break;
-		case 1:	//clear 1 register
+		case 1:	//clear one register (with the number command.splited.reg; starting with 0)
 			if(command.splited.reg < RegCount)
 				batchyReg[command.splited.reg].number = 0;
 			break;

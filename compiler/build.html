@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Build namespacefuncs</title>
+    <script type="text/javascript">
+        function changed(){
+            let cCode = document.getElementById("cCode").value;
+
+            allFuncs = cCode.split('void ');
+            exportFuncs = [];
+
+            for (let i = 0; i < allFuncs.length; i++){
+                s = allFuncs[i];
+                if(s.indexOf('/*JS{') != -1){
+                    let start = s.indexOf('/*JS{') + 4
+                    let end = s.indexOf('}*/') + 1
+
+                    let obj = s.substring(start, end)
+                    eval('objE = '+obj)
+                    
+                    argslength = objE.args.length
+                    func = objE.func.toString()
+                    functionName = s.substring(0, s.indexOf('('))
+                    
+                    batchyNrStr = 'BATCHY_NR_'+functionName
+                    posNr = cCode.indexOf(batchyNrStr)+batchyNrStr.length
+                    batchyNr = parseInt(cCode.substring(cCode.indexOf(' ', posNr), cCode.indexOf(' ', posNr+1)))
+                    func = func.replace('BATCHY', batchyNr).replaceAll('\t', '').replaceAll('  ', '')
+                    func = func.substring(func.indexOf('{')+1, func.lastIndexOf('}'))
+                    
+                    
+                    c = `"${objE.name}": function(arg){`
+                    c += `if(arg.length != ${argslength}){
+                        alert("${objE.name} needs ${argslength} arguments: ${objE.args.toString()}")
+                        return []
+                    }`
+                    c += func
+                    c += `}`
+                    exportFuncs[exportFuncs.length] = c
+                }
+            }
+            c = '{\n'+exportFuncs.join(",\n")+'\n}'
+            document.getElementById('export').value = c
+        }
+    </script>
+</head>
+<body>
+    <h1>Build namespacefuncs</h1>
+    <textarea id="cCode" onchange="changed()"></textarea>
+    <textarea id="export"></textarea>
+</body>
+</html>

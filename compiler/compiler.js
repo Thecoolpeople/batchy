@@ -47,7 +47,7 @@ function bytecodeGenerate(){
 				case "ExpressionStatement":		//function call
 					let expression = get_expression(cmd.expression)
 					let arguments = get_arguments(cmd.expression)
-					bc = lookupFuncs[expression](arguments)
+                    bc = lookupFuncs[expression](arguments)
 					console.log(expression, arguments, bc)
 				break;
 			}
