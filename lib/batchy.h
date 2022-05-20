@@ -1,19 +1,22 @@
 #ifndef BATCHY_H
 #define BATCHY_H
 
-#include "batchy_defines.h"
+#define RegCount 10
+#define RegSize 4		//4*8 = 32 bit
+#define StackCount 8	//8*4*8 = 256 bit
 
-/*
-#if RegSize == 1
+//Here are the defines which functions should be included into BATCHY
+//comment defines, which you do not need
+#define BATCHY_DEF_GPIO		//enable GPIO
+#define BATCHY_DEF_TIMER	//enable timer, sleepms,..
+#define BATCHY_DEF_SERIAL	//enable Serial: USART
+#define BATCHY_DEF_I2C		//enable I2C
 
-#elif RegSize == 2
+//batchy define functions
+#define pushfoo _Pragma("push_macro(\"BATCHY_FUNCTIONS_INIT\")") //for convenience
+#define popfoo  _Pragma("pop_macro(\"BATCHY_FUNCTIONS_INIT\")")
+#define BATCHY_FUNCTIONS_INIT
 
-#elif RegSize == 3
-
-#elif RegSize == 4
-
-#endif
-*/
 
 #if RegSize == 2
 struct uint24_t{
@@ -42,6 +45,8 @@ union Register{
 		uint32_t number;
 	#endif
 };
+
+#define BATCHYArrayMax 15       //must be a minimum of 1 bigger than the maximum value of BATCHY_NR_ (see in batchy_namespacefuncs.h)
 
 class BATCHY{
 	private:
@@ -141,18 +146,18 @@ inline void BATCHY::runCommandLink(cmd& command){
 				//TODO stack error
 			}
 			break;
-		case 9:	//call
+		case 9:	//call function from namespace
 			(BATCHYArray[paraNumber])(*this, command.splited.reg);
 			break;
 		case 10: //jump
-			batchyCommandNr.number = paraNumber;
+			batchyCommandNr.number = paraNumber - 6;		//minus 6 because of the for loop. it will add +6 before next execution
 			break;
 		case 11: //jal: this command calls a "function"
 			if((batchyStackNr+1) < StackCount){
 				batchyStack[batchyStackNr].number = batchyCommandNr.number;
 				batchyStackNr += 1;
 				
-				batchyCommandNr.number = paraNumber;
+				batchyCommandNr.number = paraNumber - 6;		//minus 6 because of the for loop. it will add +6 before next execution
 			}else{
 				//TODO stack error
 			}

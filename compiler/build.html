@@ -22,7 +22,7 @@
                     func = objE.func.toString()
                     functionName = s.substring(0, s.indexOf('('))
                     
-                    batchyNrStr = 'BATCHY_NR_'+functionName
+                    batchyNrStr = '#define BATCHY_NR_'+functionName
                     posNr = cCode.indexOf(batchyNrStr)+batchyNrStr.length
                     batchyNr = parseInt(cCode.substring(cCode.indexOf(' ', posNr), cCode.indexOf(' ', posNr+1)))
                     func = func.replace('BATCHY', batchyNr).replaceAll('\t', '').replaceAll('  ', '')

@@ -35,8 +35,31 @@ int main(){
 	std::cout << "BATCHY Test Environment" << std::endl;
 	BATCHY batchy;
 	
-	cmd uno = {0,1,0,1};
-		
+	char cmdstr[] = {
+		 10,   0,  30,   0,   0,   0,
+		 
+		//setup
+		  2,   1,   4,   0,   0,   0,
+		  2,   2,   1,   0,   0,   0,
+		  9,   0,   1,   0,   0,   0,
+		 12,   0,   0,   0,   0,   0,
+		 
+		 //main
+		 11,   0,   6,   0,   0,   0,
+		  2,   1,   4,   0,   0,   0,
+		  2,   2,   1,   0,   0,   0,
+		  9,   0,   2,   0,   0,   0,
+		  2,   1, 232,   3,   0,   0,
+		  9,   0,  10,   0,   0,   0,
+		  2,   1,   4,   0,   0,   0,
+		  2,   2,   0,   0,   0,   0,
+		  9,   0,   2,   0,   0,   0,
+		  2,   1, 232,   3,   0,   0,
+		  9,   0,  10,   0,   0,   0, 
+	};
+	batchy.runCommandString(cmdstr, sizeof(cmdstr));
+	
+	/*
 	printRegister(batchy);
 	//set 1
 	batchy.runCommand((cmd){2,1,1,0,0,0});
@@ -88,6 +111,7 @@ int main(){
 	//function GPIO digital read
 	batchy.runCommand((cmd){9,0,3,0,0,0});
 	printRegister(batchy);
+	*/
 	
 	getchar();
 }

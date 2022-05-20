@@ -21,19 +21,27 @@ let lookupFuncs = {
 							alert("gpio.digital.read needs 1 arguments: PIN")
 							return []
 						}
-	return []
+	let a = [2,1].concat(intTo4(arg[0].value))
+	let c = [9,0,3,0,0,0]
+	return [].concat(a,c)
 	},
 	"gpio.analog.mode": function(arg){if(arg.length != 2){
 							alert("gpio.analog.mode needs 2 arguments: PIN,VALUE")
 							return []
 						}
-	return []
+	let a = [2,1].concat(intTo4(arg[0].value))
+	a = a.concat([2,2]).concat(intTo4(arg[1].value))
+	let c = [9,0,4,0,0,0]
+	return [].concat(a,c)
 	},
 	"gpio.analog.write": function(arg){if(arg.length != 2){
 							alert("gpio.analog.write needs 2 arguments: PIN,VALUE")
 							return []
 						}
-	return []
+	let a = [2,1].concat(intTo4(arg[0].value))
+	a = a.concat([2,2]).concat(intTo4(arg[1].value))
+	let c = [9,0,5,0,0,0]
+	return [].concat(a,c)
 	},
 	"gpio.analog.read": function(arg){if(arg.length != 1){
 							alert("gpio.analog.read needs 1 arguments: PIN")
