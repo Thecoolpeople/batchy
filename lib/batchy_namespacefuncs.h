@@ -123,7 +123,7 @@ namespace BATCHY_FUNCTIONS{
         */
         /*JS{
             args:["PIN", "VALUE"],
-            name: "gpio.analog.mode",
+            name: "gpio_analog_mode",
             func: function(arg){
                 let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
                 a = a.concat([BATCHYCMDID.REG_SET_SINGLE,2]).concat(intTo4(arg[1]))
@@ -141,7 +141,7 @@ namespace BATCHY_FUNCTIONS{
         */
         /*JS{
             args:["PIN", "VALUE"],
-            name: "gpio.analog.write",
+            name: "gpio_analog_write",
             func: function(arg){
                 let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
                 a = a.concat([BATCHYCMDID.REG_SET_SINGLE,2]).concat(intTo4(arg[1]))
@@ -163,7 +163,7 @@ namespace BATCHY_FUNCTIONS{
         */
         /*JS{
             args:["PIN"],
-            name: "gpio.analog.read",
+            name: "gpio_analog_read",
             func: function(arg){
                 return []
             }
@@ -253,7 +253,7 @@ namespace BATCHY_FUNCTIONS{
         */
         /*JS{
             args:["speed"],
-            name: "serial.init",
+            name: "serial_init",
             func: function(arg){
                 let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
                 let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
@@ -273,7 +273,7 @@ namespace BATCHY_FUNCTIONS{
         */
         /*JS{
             args:[],
-            name: "serial.readAllRegister",
+            name: "serial_readAllRegister",
             func: function(arg){
                 let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
 		        return c
@@ -311,7 +311,7 @@ namespace BATCHY_FUNCTIONS{
     void SERIAL_SET_ALL_REG(BATCHY &b, unsigned char regReturn){    //TODO
         /*JS{
             args:[],
-            name: "serial.writeAllRegister",
+            name: "serial_writeAllRegister",
             func: function(arg){
                 let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
 		        return c

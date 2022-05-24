@@ -30,23 +30,40 @@ function astGenerate(){
 function bytecodeGenerate(){
 	astGenerate()
 
-	let convertCommand = function(functionName, cmd, stack, astNames){
-		//Returns the number of height from the step in the current function for a variable
-		function getVariableIDFromStack(stack, varname){
-			let stackLength = stack.length
-			for(let i=1; i<=stack.length; i++){
-				let stackEntry = stack[stackLength - i]
-				if(stackEntry.type == "FunctionCall"){
-					alert("Variable inside Function not found")
-					return 0
-				}else if(stackEntry.type == "VariableDeclaration"){
-					console.log(">>>>>", stackEntry.name, varname)
-					if(stackEntry.name == varname)
-						return i
-				}
+	//Returns the number of height from the step in the current function for a variable
+	function getVariableIDFromStack(stack, varname){
+		let stackLength = stack.length
+		for(let i=1; i<=stack.length; i++){
+			let stackEntry = stack[stackLength - i]
+			if(stackEntry.type == "FunctionCall"){
+				alert("Variable inside Function not found")
+				return 0
+			}else if(stackEntry.type == "VariableDeclaration"){
+				console.log(">>>>>", stackEntry.name, varname)
+				if(stackEntry.name == varname)
+					return i
 			}
 		}
-		function getParsed(functionName, cmd, stack, astNames){
+	}
+
+	//clear cache to and incl last function call
+	function deleteAllToLastFunctioncallFromStack(stack){
+		let stackLength = stack.length
+		let bc = []
+		for(let i=1; i<=stackLength; i++){
+			let stackEntry = stack[stackLength - i]
+			if(stackEntry.type == "FunctionCall"){
+				break;
+			}
+			stack.pop()
+			bc = [...bc, BATCHYCMDID.STACK_POP, 0, 0, 0, 0, 0]
+		}
+		return {bc:bc, stack: stack}
+	}
+
+	let convertCommand = function(functionName, cmd, stack, astNames){
+		function getParsed(functionName, cmd, stack, astNames, args){
+			if(!args) args = {}
 			switch(cmd.type){
 				case "ExpressionStatement":
 					return getParsed(functionName, cmd.expression, stack, astNames)
@@ -72,6 +89,45 @@ function bytecodeGenerate(){
 					return {bc:bc, stack:stack}
 				}break;
 
+				case "BinaryExpression":{
+					let outputReg = args.outputReg || 0;
+					let inputRegL = args.inputRegL || 1;
+					let inputRegR = args.inputRegR || 2;
+					let left = getParsed(functionName, cmd.left, stack, astNames, {outputReg: inputRegL, inputRegL: inputRegL, inputRegR: inputRegL+1})
+					let bc = []
+
+					if(typeof left == "number"){
+						bc = [BATCHYCMDID.REG_SET_SINGLE, inputRegL, ...intTo4(left)]
+					}else if(typeof left == "string"){
+						let height = getVariableIDFromStack(stack, left)
+						bc = [BATCHYCMDID.STACK_GET, inputRegL, ...intTo4(height)]
+					}else if(typeof left == "object"){
+						bc = left.bc
+						stack = left.stack;
+					}
+					
+					let right = getParsed(functionName, cmd.right, stack, astNames, {outputReg: inputRegR, inputRegL: inputRegR, inputRegR: inputRegR+1})
+					if(typeof right == "number"){
+						bc = [...bc, BATCHYCMDID.REG_SET_SINGLE, inputRegR, ...intTo4(right)]
+					}else if(typeof right == "string"){
+						let height = getVariableIDFromStack(stack, right)
+						bc = [...bc, BATCHYCMDID.STACK_GET, inputRegR, ...intTo4(height)]
+					}else if(typeof right == "object"){
+						bc = [...bc, ...right.bc]
+						stack = right.stack;
+					}
+					switch(cmd.operator){
+						case '+': bc = [...bc, BATCHYCMDID.MATH_ADD, outputReg, inputRegL,inputRegR,0,0]; break;
+						case '-': bc = [...bc, BATCHYCMDID.MATH_SUB, outputReg, inputRegL,inputRegR,0,0]; break;
+						case '*': bc = [...bc, BATCHYCMDID.MATH_MUL, outputReg, inputRegL,inputRegR,0,0]; break;
+						case '/': bc = [...bc, BATCHYCMDID.MATH_DIV, outputReg, inputRegL,inputRegR,0,0]; break;
+						case '%': bc = [...bc, BATCHYCMDID.MATH_MOD, outputReg, inputRegL,inputRegR,0,0]; break;
+						default:
+							alter("Operator not implemented: "+cmd.operator)
+					}
+					return {bc:bc, stack:stack}
+				}break;
+
 				case "VariableDeclaration":{
 					let type = cmd.defType.name
 					if(cmd.defType.name != "int")
@@ -80,15 +136,18 @@ function bytecodeGenerate(){
 					let name = cmd.name
 
 					let value = getParsed(functionName, cmd.value, stack, astNames)
-					console.log(value, typeof value)
 					if(typeof value == "number"){	//Numbervalue
-						bc = [BATCHYCMDID.REG_SET_SINGLE, 1, ...intTo4(value),		//set register 1
-							BATCHYCMDID.STACK_PUSH, 1, 0, 0, 0, 0]					//push to stack
+						bc = [BATCHYCMDID.REG_SET_SINGLE, 0, ...intTo4(value),		//set register 1
+							BATCHYCMDID.STACK_PUSH, 0, 0, 0, 0, 0]					//push to stack
 					}else if(typeof value == "string"){	//String
 						//check if value is a variable
 						let height = getVariableIDFromStack(stack, value)
-						bc = [BATCHYCMDID.STACK_GET, 1, ...intTo4(height),			//get from stack and write to register 1
-							BATCHYCMDID.STACK_PUSH, 1, 0, 0, 0, 0]					//push to stack
+						bc = [BATCHYCMDID.STACK_GET, 0, ...intTo4(height),			//get from stack and write to register 1
+							BATCHYCMDID.STACK_PUSH, 0, 0, 0, 0, 0]					//push to stack
+					}else if(typeof value == "object"){
+						bc = value.bc
+						stack = value.stack
+						bc = [...bc, BATCHYCMDID.STACK_PUSH, 0, 0, 0, 0, 0]					//push to stack
 					}
 					stack.push({type: "VariableDeclaration", name: name, defType:type})
 					return {bc:bc, stack:stack}
@@ -116,44 +175,7 @@ function bytecodeGenerate(){
 		stack = ret.stack;
 
 
-		/*let type = cmd.type			//get command type
-		let bc = []
-		switch(type){
-			case "VariableDeclaration":
-				let varName = cmd.name
-				switch(cmd.defType.name){
-					case "int":	//int has 4 bytes
-						stack[stack.length] = {type:"variable", defType: "int", name:varName, function:functionName}
-					break;
-				}
-				
-				if(!cmd.value){
-					cmd.value = {type:"Literal", value:0}	//set to zero if no value
-				}
-
-				let value = get_expression(cmd.value)
-				if(typeof value == "number"){	//Numbervalue
-					bc = [BATCHYCMDID.REG_SET_SINGLE, 1, ...intTo4(value),
-						BATCHYCMDID.STACK_PUSH, 1, 0, 0, 0, 0]
-				}else if(value in lookupFuncs){	//FunctionCall
-					alert("TODO")
-				}else{							//Other Variable
-					//Search in stack for variable
-				}
-			break;
-			case "ExpressionStatement":		//function call
-				let expression = get_expression(cmd.expression)
-				let arguments = get_arguments(cmd.expression)
-
-				//check if express is a function call for a user function
-				if(astNames.includes(expression)){
-					bc = [BATCHYCMDID.JUMP_JAL, 0, expression,0,0,0]	//This will be replaced in the main
-				}else{
-					//this is a function from the namespace
-					bc = lookupFuncs[expression](arguments)
-					//console.log(expression, arguments, bc)
-				}
-			break;
+		/*
 			case "IfStatement":
 				function Condition(condition){
 					switch(condition.left.type){
@@ -185,6 +207,9 @@ function bytecodeGenerate(){
 			func_bc = func_bc.concat(bc)
 		})
 		if(name != "main"){
+			let ret = deleteAllToLastFunctioncallFromStack(stackFunc)
+			stackFunc = ret.stack
+			func_bc = func_bc.concat(ret.bc)	//delete all local vars and co
 			func_bc = func_bc.concat([BATCHYCMDID.JUMP_JALRET,0,0,0,0,0])	//This is jal return. see batchy.h
 		}
 		return func_bc
