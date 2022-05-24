@@ -20,7 +20,7 @@
 			
 		</tr>
 		<tr>
-			<td valign="top" width="33%"><div contenteditable="true" id="Ccode" style="height:85vh; width:100%; overflow:scroll;">void setup(){<br>gpio.digital.mode(4,1);<br>}<br><br>void main(){<br>setup();<br>gpio.digital.write(4,1); //set to high<br>delay.ms(1000);<br>gpio.digital.write(4,0); //set to low<br>delay.ms(1000);<br>}</div></td>
+			<td valign="top" width="33%"><div contenteditable="true" id="Ccode" style="height:85vh; width:100%; overflow:scroll;">void setup(){<br>gpio_digital_mode(4,1);<br>}<br><br>void main(){<br>int a = 10;<br>int b = a;<br>setup();<br>gpio_digital_write(4,1); //set to high<br>delay_ms(1000);<br>gpio_digital_write(4,0); //set to low<br>delay_ms(1000);<br>}</div></td>
 			<td valign="top" width="33%"><div id="Cast" style="height:85vh; width:100%; overflow:scroll;"></div></td>
 			<td valign="top" width="33%"><div id="Cbytecode" style="height:85vh; width:100%; overflow:scroll;font-family: Consolas, monaco, monospace; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 20px;"></div></td>
 		</tr>

@@ -5,6 +5,38 @@ BATCHY is a very simple bytecode interpreter. This simple and small code can be 
 ## installation
 just download the repository and open the `batchy.ino` file.
 
+
+## documentation
+### structure of a command
+A single Command is build with:
+ - 1 Byte CommandID
+ - 1 Byte RegisterID -> This will result in a maximum of 256 Registers, which can be used
+ - 4 Byte of Data
+
+
+All available commands:
+
+	| CommandID | RegisterID | 4 Byte of Data |   GROUP  | Description |
+	|-----------|------------|----------------|----------|-------------|
+	| 0         | 0          | 0,0,0,0        |Register  | clear all Registers|
+	| 1         | N          | 0,0,0,0        |Register  | clear the Register with ID `N`|
+	| 2         | N          | 4Byte-DATA     |Register  | set the Register with ID `N` to value DATA|
+	| 3         | N          | A,B,0,0        |Math      | (N = A + B) Add Register A to Register B and save it to Register N|
+	| 4         | N          | A,B,0,0        |Math      | (N = A - B) Sub Register A to Register B and save it to Register N|
+	| 5         | N          | A,B,0,0        |Math      | (N = A * B) Mult Register A to Register B and save it to Register N|
+	| 6         | N          | A,B,0,0        |Math      | (N = A / B) Div Register A from Register B and save it to Register N|
+	| 7         | N          | A,B,0,0        |Math      | (N = A % B) Modulo Register A from Register B and save it to Register N|
+	| 10        | N          | 0,0,0,0        |Stack     | Push Register N to stack|
+	| 11        | N          | 0,0,0,0        |Stack     | Pop last Stack to Register N|
+	| 12        | N          | 4-Byte:A       |Stack     | Put Register N to the -A last Stacksize element|
+	| 13        | N          | 4-Byte:A       |Stack     | Get the -A last Stacksize element to Register N|
+	| 20        | 0          | 4-Byte:A       |Jump      | Jump to position N in the BYTECODE|
+	| 21        | 0          | 4-Byte:A       |Jump      | JAL: Jump and remember the current position in the BYTECODE (Put that position onto the stack)|
+	| 22        | 0          | 0,0,0,0        |Jump      | JAL return Jump back in the BYTECODE (Must be used after JAL, otherwise stack will explode)|
+	| 30        | N          | 4-Byte:A       |BATCHY    | Will execute the A's number of BATCHY Function and return the value (if there is one) to Register N|
+	| 31        | TODO       | TODO           |Condition | TODO|
+	
+
 ## code implemention
 
 include the main batchy header

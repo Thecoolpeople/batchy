@@ -38,11 +38,11 @@ namespace BATCHY_FUNCTIONS{
         */
         /*JS{
             args:["PIN", "VALUE"],
-            name: "gpio.digital.mode",
+            name: "gpio_digital_mode",
             func: function(arg){
-                let a = [2,1].concat(intTo4(arg[0].value))
-                a = a.concat([2,2]).concat(intTo4(arg[1].value))
-                let c = [9,0,BATCHY,0,0,0]
+                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
+                a = a.concat([BATCHYCMDID.REG_SET_SINGLE,2]).concat(intTo4(arg[1]))
+                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
                 return [].concat(a,c)
             }
         }*/
@@ -81,11 +81,11 @@ namespace BATCHY_FUNCTIONS{
         */
         /*JS{
             args:["PIN", "VALUE"],
-            name: "gpio.digital.write",
+            name: "gpio_digital_write",
             func: function(arg){
-                let a = [2,1].concat(intTo4(arg[0].value))
-                a = a.concat([2,2]).concat(intTo4(arg[1].value))
-                let c = [9,0,BATCHY,0,0,0]
+                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
+                a = a.concat([BATCHYCMDID.REG_SET_SINGLE,2]).concat(intTo4(arg[1]))
+                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
                 return [].concat(a,c)
             }
         }*/
@@ -102,10 +102,10 @@ namespace BATCHY_FUNCTIONS{
         */
         /*JS{
             args:["PIN"],
-            name: "gpio.digital.read",
+            name: "gpio_digital_read",
             func: function(arg){
-                let a = [2,1].concat(intTo4(arg[0].value))
-                let c = [9,0,BATCHY,0,0,0]
+                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
+                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
                 return [].concat(a,c)
             }
         }*/
@@ -125,9 +125,9 @@ namespace BATCHY_FUNCTIONS{
             args:["PIN", "VALUE"],
             name: "gpio.analog.mode",
             func: function(arg){
-                let a = [2,1].concat(intTo4(arg[0].value))
-                a = a.concat([2,2]).concat(intTo4(arg[1].value))
-                let c = [9,0,BATCHY,0,0,0]
+                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
+                a = a.concat([BATCHYCMDID.REG_SET_SINGLE,2]).concat(intTo4(arg[1]))
+                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
                 return [].concat(a,c)
             }
         }*/
@@ -143,9 +143,9 @@ namespace BATCHY_FUNCTIONS{
             args:["PIN", "VALUE"],
             name: "gpio.analog.write",
             func: function(arg){
-                let a = [2,1].concat(intTo4(arg[0].value))
-                a = a.concat([2,2]).concat(intTo4(arg[1].value))
-                let c = [9,0,BATCHY,0,0,0]
+                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
+                a = a.concat([BATCHYCMDID.REG_SET_SINGLE,2]).concat(intTo4(arg[1]))
+                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
                 return [].concat(a,c)
             }
         }*/
@@ -194,10 +194,10 @@ namespace BATCHY_FUNCTIONS{
         */
         /*JS{
             args:["Duration ms"],
-            name: "delay.ms",
+            name: "delay_ms",
             func: function(arg){
-                let a = [2,1].concat(intTo4(arg[0].value))
-                let c = [9,0,BATCHY,0,0,0]
+                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
+                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
                 return [].concat(a,c)
             }
         }*/
@@ -214,10 +214,10 @@ namespace BATCHY_FUNCTIONS{
         */
         /*JS{
             args:["Duration us"],
-            name: "delay.us",
+            name: "delay_us",
             func: function(arg){
-                let a = [2,1].concat(intTo4(arg[0].value))
-                let c = [9,0,BATCHY,0,0,0]
+                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
+                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
                 return [].concat(a,c)
             }
         }*/
@@ -255,8 +255,8 @@ namespace BATCHY_FUNCTIONS{
             args:["speed"],
             name: "serial.init",
             func: function(arg){
-                let a = [2,1].concat(intTo4(arg[0].value))
-                let c = [9,0,BATCHY,0,0,0]
+                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
+                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
                 return [].concat(a,c)
             }
         }*/
@@ -275,7 +275,7 @@ namespace BATCHY_FUNCTIONS{
             args:[],
             name: "serial.readAllRegister",
             func: function(arg){
-                let c = [9,0,BATCHY,0,0,0]
+                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
 		        return c
             }
         }*/
@@ -313,7 +313,7 @@ namespace BATCHY_FUNCTIONS{
             args:[],
             name: "serial.writeAllRegister",
             func: function(arg){
-                let c = [9,0,BATCHY,0,0,0]
+                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
 		        return c
             }
         }*/

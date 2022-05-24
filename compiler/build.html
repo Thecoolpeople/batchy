@@ -4,6 +4,9 @@
     <title>Build namespacefuncs</title>
     <script type="text/javascript">
         function changed(){
+            let intTo4 = function(value){
+                return [value&0xFF, (value>>8)&0xFF, (value>>16)&0xFF, (value>>24)&0xFF]
+            }
             let cCode = document.getElementById("cCode").value;
 
             allFuncs = cCode.split('void ');
@@ -25,7 +28,7 @@
                     batchyNrStr = '#define BATCHY_NR_'+functionName
                     posNr = cCode.indexOf(batchyNrStr)+batchyNrStr.length
                     batchyNr = parseInt(cCode.substring(cCode.indexOf(' ', posNr), cCode.indexOf(' ', posNr+1)))
-                    func = func.replace('BATCHY', batchyNr).replaceAll('\t', '').replaceAll('  ', '')
+                    func = func.replace('BATCHYDATA', intTo4(batchyNr)).replaceAll('\t', '').replaceAll('  ', '')
                     func = func.substring(func.indexOf('{')+1, func.lastIndexOf('}'))
                     
                     
@@ -33,7 +36,7 @@
                     c += `if(arg.length != ${argslength}){
                         alert("${objE.name} needs ${argslength} arguments: ${objE.args.toString()}")
                         return []
-                    }`
+                    }`.replaceAll('  ', '')
                     c += func
                     c += `}`
                     exportFuncs[exportFuncs.length] = c
