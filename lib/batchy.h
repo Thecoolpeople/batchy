@@ -2,8 +2,10 @@
 #define BATCHY_H
 
 #define RegCount 10
-#define RegSize 4        //4*8 = 32 bit
-#define StackCount 128    //128*4*8 = 4096 bit
+#define RegSize 4        //4Byte*8 = 32 bit
+#define StackCount 128    //128*4 = 512Byte*8 = 4096 bit
+
+#define BATCHYFuncsMax 15       //must be a minimum of 1 bigger than the maximum value of BATCHY_NR_ (see in batchy_namespacefuncs.h)
 
 //Here are the defines which functions should be included into BATCHY
 //comment defines, which you do not need
@@ -46,7 +48,9 @@ union Register{
     #endif
 };
 
-#define BATCHYArrayMax 15       //must be a minimum of 1 bigger than the maximum value of BATCHY_NR_ (see in batchy_namespacefuncs.h)
+#ifdef BATCHY_SD
+  #include <SD.h>
+#endif
 
 class BATCHY{
     private:
@@ -55,23 +59,24 @@ class BATCHY{
         Register batchyCommandNr;
         
         unsigned char* eepromInternal;
+        void getInternalEEPROM(unsigned char *value, int start, int end);
+        void setInternalEEPROM(int start, int end, unsigned char* value);
         
     public:
-    Register batchyReg[RegCount];
+        Register batchyReg[RegCount];
         typedef void (*FnPtrBATCHY)(BATCHY&, unsigned char);
-        FnPtrBATCHY BATCHYArray[BATCHYArrayMax];
+        FnPtrBATCHY BATCHYArray[BATCHYFuncsMax];
         
         BATCHY(int eepromInternalSize);
         ~BATCHY();
         
         Register* getRegister(){return batchyReg;}
-        void clear_register();
         void runCommandLink(cmd& command);
         void runCommand(cmd command);
-        void runCommandString(char* cmdstr, uint32_t length);    
-        
-        void getInternalEEPROM(unsigned char *value, int start, int end);
-        void setInternalEEPROM(int start, int end, unsigned char* value);
+        void runCommandString(char* cmdstr, uint32_t length);
+        #ifdef BATCHY_SD
+            void runCommandSD(int cs_pin, String filename, int bufferSize);
+        #endif
 };
 
 #include "batchy_namespacefuncs.h"
@@ -93,11 +98,11 @@ BATCHY::~BATCHY(){
     delete[] eepromInternal;
 }
 
-void BATCHY::getInternalEEPROM(unsigned char *value, int start, int end){
+inline void BATCHY::getInternalEEPROM(unsigned char *value, int start, int end){
     for(int i=start; i<=end; i++)
         value[i-start] = eepromInternal[i];
 }
-void BATCHY::setInternalEEPROM(int start, int end, unsigned char* value){
+inline void BATCHY::setInternalEEPROM(int start, int end, unsigned char* value){
     for(int i=start; i<=end; i++)
         eepromInternal[i] = value[i-start];
 }
@@ -140,11 +145,35 @@ inline void BATCHY::runCommandLink(cmd& command){
 		case 7:    //modulo
             batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number % batchyReg[command.splited.parameter[1]].number;
             break;
+        case 8:    //equal
+            batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number == batchyReg[command.splited.parameter[1]].number;
+            break;
+        case 9:    //not equal
+            batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number != batchyReg[command.splited.parameter[1]].number;
+            break;
+        case 10:    //and
+            batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number && batchyReg[command.splited.parameter[1]].number;
+            break;
+        case 11:    //or
+            batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number || batchyReg[command.splited.parameter[1]].number;
+            break;
+        case 12:    //greater
+            batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number > batchyReg[command.splited.parameter[1]].number;
+            break;
+        case 13:    //smaller
+            batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number < batchyReg[command.splited.parameter[1]].number;
+            break;
+        case 14:    //greater or equal
+            batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number >= batchyReg[command.splited.parameter[1]].number;
+            break;
+        case 15:    //smaller or equal
+            batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number <= batchyReg[command.splited.parameter[1]].number;
+            break;
 
 		//////////////////////////////////////
 		//			STACK
 		//////////////////////////////////////
-        case 10:    //push reg stack
+        case 16:    //push reg stack
             if((batchyStackNr+1) < StackCount){
                 batchyStack[batchyStackNr].number = batchyReg[command.splited.parameter[0]].number;
                 batchyStackNr += 1;
@@ -152,10 +181,24 @@ inline void BATCHY::runCommandLink(cmd& command){
                 //TODO stack error
             }
             break;
-        case 11:    //pop reg stack
+        case 17:    //pop reg stack
             if(batchyStackNr > 0){
                 batchyStackNr -= 1;
                 batchyReg[command.splited.parameter[0]].number = batchyStack[batchyStackNr].number;
+            }else{
+                //TODO stack error
+            }
+            break;
+        case 18:    //put variable to n'th height of stack from top   (put a register to n'th height of stack from top)
+            if((batchyStackNr-paraNumber) >= 0){
+                batchyStack[batchyStackNr-paraNumber].number = batchyReg[command.splited.parameter[0]].number;
+            }else{
+                //TODO stack error
+            }
+            break;
+        case 19:    //get variable from n'th height of stack from top (put n'th height of stack from top to a register)
+            if((batchyStackNr-paraNumber) >= 0){
+                batchyReg[command.splited.parameter[0]].number = batchyStack[batchyStackNr-paraNumber].number;
             }else{
                 //TODO stack error
             }
@@ -198,31 +241,11 @@ inline void BATCHY::runCommandLink(cmd& command){
 		//			Conditions
 		//////////////////////////////////////
         case 31: //if
-            switch(paraNumber){
-                case 0:        //equal
-                    batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number == batchyReg[command.splited.parameter[1]].number;
-                    break;
-                case 1:        //not equal
-                    batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number != batchyReg[command.splited.parameter[1]].number;
-                    break;
-                case 2:        //and
-                    batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number && batchyReg[command.splited.parameter[1]].number;
-                    break;
-                case 3:        //or
-                    batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number || batchyReg[command.splited.parameter[1]].number;
-                    break;
-                case 10:    //greater
-                    batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number > batchyReg[command.splited.parameter[1]].number;
-                    break;
-                case 11:    //smaller
-                    batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number < batchyReg[command.splited.parameter[1]].number;
-                    break;
-                case 12:    //greater or equal
-                    batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number >= batchyReg[command.splited.parameter[1]].number;
-                    break;
-				case 13:    //smaller or equal
-                    batchyReg[command.splited.reg].number = batchyReg[command.splited.parameter[0]].number <= batchyReg[command.splited.parameter[1]].number;
-                    break;
+            if(batchyReg[command.splited.parameter[0]].number){
+                //do nothing. the true condition is the next command
+            }else{
+                //make a step of +1 Command. the false condition is the upper-next command
+                batchyCommandNr.number = paraNumber + 6;
             }
             break;
     }
@@ -235,5 +258,35 @@ void BATCHY::runCommandString(char* cmdstr, uint32_t length){
         runCommandLink(*((cmd*)(cmdstr+batchyCommandNr.number)));
     }
 }
+
+#ifdef BATCHY_SD
+void BATCHY::runCommandSD(int cs_pin, String filename, int bufferSize){
+    if (!SD.begin(cs_pin)){
+        return;
+    }
+    File file = SD.open("batchy.txt", FILE_READ);
+    if(file){
+        char buf[bufferSize];
+        Register bufferStart;
+        bufferStart.number = 0;
+        
+        int length = file.size();
+        file.seek(bufferStart.number);
+        file.read(buf, bufferSize);
+
+        for(batchyCommandNr.number = 0; batchyCommandNr.number < length; batchyCommandNr.number+=6){
+
+            if( !((bufferStart.number <= batchyCommandNr.number) && ((bufferStart.number + bufferSize) > batchyCommandNr.number))){
+                bufferStart.number = batchyCommandNr.number;
+                file.seek(bufferStart.number);
+                file.read(buf, bufferSize);
+            }
+
+            runCommandLink(*((cmd*)(buf+(batchyCommandNr.number-bufferStart.number))));
+        }
+    }
+    file.close();
+}
+#endif
 
 #endif
