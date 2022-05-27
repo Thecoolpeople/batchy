@@ -9,13 +9,24 @@ BATCHYCMDID = {
 	MATH_MUL: 5,
 	MATH_DIV: 6,
 	MATH_MOD: 7,
-	STACK_PUSH: 10,
-	STACK_POP: 11,
-	STACK_PUT: 12,
-	STACK_GET: 13,
+	MATH_EQ:  8,
+	MATH_NEQ: 9,
+	MATH_AND: 10,
+	MATH_OR:  11,
+	MATH_GREATER: 12,
+	MATH_SMALLER: 13,
+	MATH_GREATEREQ: 14,
+	MATH_SMALLEREQ: 15,
+
+	STACK_PUSH: 16,
+	STACK_POP:  17,
+	STACK_PUT:  18,
+	STACK_GET:  19,
+
 	JUMP_NORMAL: 20,
-	JUMP_JAL: 21,
+	JUMP_JAL: 	 21,
 	JUMP_JALRET: 22,
+
 	BATCHY_CMD: 30,
 	CONDITION: 31
 }
@@ -74,6 +85,8 @@ function bytecodeGenerate(){
 					let parameter = cmd.arguments
 					if(parameter.length != 1 || parameter[0] != null)
 						parameter = parameter.map((c,i)=>{console.log(c,i);return getParsed(functionName, c, stack, astNames)})
+					else
+						parameter = []
 
 					console.log(parameter)
 					//check if express is a function call for a user function
@@ -122,8 +135,18 @@ function bytecodeGenerate(){
 						case '*': bc = [...bc, BATCHYCMDID.MATH_MUL, outputReg, inputRegL,inputRegR,0,0]; break;
 						case '/': bc = [...bc, BATCHYCMDID.MATH_DIV, outputReg, inputRegL,inputRegR,0,0]; break;
 						case '%': bc = [...bc, BATCHYCMDID.MATH_MOD, outputReg, inputRegL,inputRegR,0,0]; break;
+
+						case '==': bc = [...bc, BATCHYCMDID.MATH_EQ, 		outputReg, inputRegL,inputRegR,0,0]; break;
+						case '!=': bc = [...bc, BATCHYCMDID.MATH_NEQ, 		outputReg, inputRegL,inputRegR,0,0]; break;
+						case '&&': bc = [...bc, BATCHYCMDID.MATH_AND, 		outputReg, inputRegL,inputRegR,0,0]; break;
+						case '||': bc = [...bc, BATCHYCMDID.MATH_OR, 		outputReg, inputRegL,inputRegR,0,0]; break;
+						case '>': bc =  [...bc, BATCHYCMDID.MATH_GREATER, 	outputReg, inputRegL,inputRegR,0,0]; break;
+						case '<': bc =  [...bc, BATCHYCMDID.MATH_SMALLER, 	outputReg, inputRegL,inputRegR,0,0]; break;
+						case '>=': bc = [...bc, BATCHYCMDID.MATH_GREATEREQ, outputReg, inputRegL,inputRegR,0,0]; break;
+						case '<=': bc = [...bc, BATCHYCMDID.MATH_SMALLEREQ, outputReg, inputRegL,inputRegR,0,0]; break;
+
 						default:
-							alter("Operator not implemented: "+cmd.operator)
+							alert("Operator not implemented: "+cmd.operator)
 					}
 					return {bc:bc, stack:stack}
 				}break;
@@ -262,6 +285,29 @@ function bytecodeGenerate(){
 		if((i+1) % 6 == 0)
 			document.getElementById("Cbytecode").innerHTML += '<br>'
 	}
+
+	return BYTECODE
+}
+
+downloadFile = function(){
+	let bc = bytecodeGenerate()
+
+	function downloadString(text, fileType, fileName) {
+		var blob = new Blob([text], { type: fileType });
+
+		var a = document.createElement('a');
+		a.download = fileName;
+		a.href = URL.createObjectURL(blob);
+		a.dataset.downloadurl = [fileType, a.download, a.href].join(':');
+		a.style.display = "none";
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		setTimeout(function() { URL.revokeObjectURL(a.href); }, 1500);
+	}
+
+	downloadString(new Uint8Array(bc), "text/txt", "batchy.txt")
+
 }
 
 let allFunctionsShow = function(){

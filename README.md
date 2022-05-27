@@ -26,15 +26,23 @@ All available commands:
 	| 5         | N          | A,B,0,0        |Math      | (N = A * B) Mult Register A to Register B and save it to Register N|
 	| 6         | N          | A,B,0,0        |Math      | (N = A / B) Div Register A from Register B and save it to Register N|
 	| 7         | N          | A,B,0,0        |Math      | (N = A % B) Modulo Register A from Register B and save it to Register N|
-	| 10        | N          | 0,0,0,0        |Stack     | Push Register N to stack|
-	| 11        | N          | 0,0,0,0        |Stack     | Pop last Stack to Register N|
-	| 12        | N          | 4-Byte:A       |Stack     | Put Register N to the -A last Stacksize element|
-	| 13        | N          | 4-Byte:A       |Stack     | Get the -A last Stacksize element to Register N|
+	| 8         | N          | A,B,0,0        |Math      | (N = A == B) Equal Register A from Register B and save it to Register N|
+	| 9         | N          | A,B,0,0        |Math      | (N = A != B) NotEqual Register A from Register B and save it to Register N|
+	| 10        | N          | A,B,0,0        |Math      | (N = A && B) AND Register A from Register B and save it to Register N|
+	| 11        | N          | A,B,0,0        |Math      | (N = A || B) OR Register A from Register B and save it to Register N|
+	| 12        | N          | A,B,0,0        |Math      | (N = A > B) Greater Register A from Register B and save it to Register N|
+	| 13        | N          | A,B,0,0        |Math      | (N = A < B) Smaller Register A from Register B and save it to Register N|
+	| 14        | N          | A,B,0,0        |Math      | (N = A >= B) Greater or Equal Register A from Register B and save it to Register N|
+	| 15        | N          | A,B,0,0        |Math      | (N = A <= B) Smaller or Equal Register A from Register B and save it to Register N|
+	| 16        | N          | 0,0,0,0        |Stack     | Push Register N to stack|
+	| 17        | N          | 0,0,0,0        |Stack     | Pop last Stack to Register N|
+	| 18        | N          | 4-Byte:A       |Stack     | Put Register N to the -A last Stacksize element|
+	| 19        | N          | 4-Byte:A       |Stack     | Get the -A last Stacksize element to Register N|
 	| 20        | 0          | 4-Byte:A       |Jump      | Jump to position N in the BYTECODE|
 	| 21        | 0          | 4-Byte:A       |Jump      | JAL: Jump and remember the current position in the BYTECODE (Put that position onto the stack)|
 	| 22        | 0          | 0,0,0,0        |Jump      | JAL return Jump back in the BYTECODE (Must be used after JAL, otherwise stack will explode)|
 	| 30        | N          | 4-Byte:A       |BATCHY    | Will execute the A's number of BATCHY Function and return the value (if there is one) to Register N|
-	| 31        | TODO       | TODO           |Condition | TODO|
+	| 31        | N          | 0,0,0,0        |Condition | Check if register N'th value is == 0 -> FALSE (else), N is != 0 -> TRUE |
 	
 
 ## code implemention

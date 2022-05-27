@@ -36,82 +36,50 @@ int main(){
 	BATCHY batchy;
 	
 	char cmdstr[] = {
-		 10,   0,  30,   0,   0,   0,
-		 
-		//setup
+		 20,   0, 120,   0,   0,   0,
+		  2,   0,  10,   0,   0,   0,
+		 16,   0,   0,   0,   0,   0,
+		 19,   0,   1,   0,   0,   0,
+		 16,   0,   0,   0,   0,   0,
+		 19,   1,   2,   0,   0,   0,
+		 19,   2,   1,   0,   0,   0,
+		  5,   1,   1,   2,   0,   0,
+		 19,   2,   1,   0,   0,   0,
+		  5,   1,   1,   2,   0,   0,
+		 19,   2,   2,   0,   0,   0,
+		  4,   0,   1,   2,   0,   0,
+		 16,   0,   0,   0,   0,   0,
 		  2,   1,   4,   0,   0,   0,
 		  2,   2,   1,   0,   0,   0,
-		  9,   0,   1,   0,   0,   0,
-		 12,   0,   0,   0,   0,   0,
-		 
-		 //main
-		 11,   0,   6,   0,   0,   0,
+		 30,   0,   1,   0,   0,   0,
+		 17,   0,   0,   0,   0,   0,
+		 17,   0,   0,   0,   0,   0,
+		 17,   0,   0,   0,   0,   0,
+		 22,   0,   0,   0,   0,   0,
+		  2,   1, 128,  37,   0,   0,
+		 30,   0,  12,   0,   0,   0,
+		  2,   0,  10,   0,   0,   0,
+		 16,   0,   0,   0,   0,   0,
+		 19,   0,   1,   0,   0,   0,
+		 16,   0,   0,   0,   0,   0,
+		 30,   0,  13,   0,   0,   0,
+		 21,   0,   6,   0,   0,   0,
+		 30,   0,  13,   0,   0,   0,
 		  2,   1,   4,   0,   0,   0,
 		  2,   2,   1,   0,   0,   0,
-		  9,   0,   2,   0,   0,   0,
+		 30,   0,   2,   0,   0,   0,
 		  2,   1, 232,   3,   0,   0,
-		  9,   0,  10,   0,   0,   0,
+		 30,   0,  10,   0,   0,   0,
 		  2,   1,   4,   0,   0,   0,
 		  2,   2,   0,   0,   0,   0,
-		  9,   0,   2,   0,   0,   0,
+		 30,   0,   2,   0,   0,   0,
 		  2,   1, 232,   3,   0,   0,
-		  9,   0,  10,   0,   0,   0, 
+		 30,   0,  10,   0,   0,   0,
+		 30,   0,  13,   0,   0,   0, 
 	};
 	batchy.runCommandString(cmdstr, sizeof(cmdstr));
 	
-	/*
-	printRegister(batchy);
-	//set 1
-	batchy.runCommand((cmd){2,1,1,0,0,0});
-	printRegister(batchy);
-	//set 2
-	batchy.runCommand((cmd){2,2,2,1,0,0});
-	printRegister(batchy);
-	//add_register
-	batchy.runCommand((cmd){3,0,1,2,0,0});
-	printRegister(batchy);
-	//sub_register
-	batchy.runCommand((cmd){4,0,1,2,0,0});
-	printRegister(batchy);
-	//clear 1
-	batchy.runCommand((cmd){1,1,0,0,0,0});
-	printRegister(batchy);
-	//clear 2
-	batchy.runCommand((cmd){1,2,0,0,0,0});
-	printRegister(batchy);
-	//clear 0
-	batchy.runCommand((cmd){1,0,0,0,0,0});
-	printRegister(batchy);
 	
-	char cmdstr[] = {
-		2,1,255,0,0,0,	//set 1
-		2,2,2,1,0,0,	//set 2
-		3,0,1,2,0,0,	//add_register
-		9,0,13,0,0,0,	//show all registers
-		4,0,1,2,0,0,	//sub_register
-		1,1,0,0,0,0,	//clear 1
-		1,2,0,0,0,0		//clear 0
-	};
-	batchy.runCommandString(cmdstr, sizeof(cmdstr));
-	printRegister(batchy);
-	
-	
-	//function tempi
-	batchy.runCommand((cmd){9,0,0,0,0,0});
-	printRegister(batchy);
-	
-	//function GPIO digital mode
-	batchy.runCommand((cmd){2,1,1,0,0,0});	//set reg1 = 1
-	batchy.runCommand((cmd){2,2,1,0,0,0});	//set reg2 = 1
-	batchy.runCommand((cmd){9,0,1,0,0,0});
-	printRegister(batchy);
-	//function GPIO digital set
-	batchy.runCommand((cmd){9,0,2,0,0,0});
-	printRegister(batchy);
-	//function GPIO digital read
-	batchy.runCommand((cmd){9,0,3,0,0,0});
-	printRegister(batchy);
-	*/
 	
 	getchar();
 }
