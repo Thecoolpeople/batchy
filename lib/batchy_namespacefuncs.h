@@ -40,10 +40,7 @@ namespace BATCHY_FUNCTIONS{
             args:["PIN", "VALUE"],
             name: "gpio_digital_mode",
             func: function(arg){
-                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
-                a = a.concat([BATCHYCMDID.REG_SET_SINGLE,2]).concat(intTo4(arg[1]))
-                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
-                return [].concat(a,c)
+                return [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
             }
         }*/
         #if defined(uC)
@@ -83,10 +80,7 @@ namespace BATCHY_FUNCTIONS{
             args:["PIN", "VALUE"],
             name: "gpio_digital_write",
             func: function(arg){
-                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
-                a = a.concat([BATCHYCMDID.REG_SET_SINGLE,2]).concat(intTo4(arg[1]))
-                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
-                return [].concat(a,c)
+                return [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
             }
         }*/
         #if defined(uC)
@@ -104,9 +98,7 @@ namespace BATCHY_FUNCTIONS{
             args:["PIN"],
             name: "gpio_digital_read",
             func: function(arg){
-                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
-                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
-                return [].concat(a,c)
+                return [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
             }
         }*/
         #if defined(uC)
@@ -125,10 +117,7 @@ namespace BATCHY_FUNCTIONS{
             args:["PIN", "VALUE"],
             name: "gpio_analog_mode",
             func: function(arg){
-                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
-                a = a.concat([BATCHYCMDID.REG_SET_SINGLE,2]).concat(intTo4(arg[1]))
-                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
-                return [].concat(a,c)
+                return [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
             }
         }*/
         GPIO_DIGITAL_MODE(b, regReturn);
@@ -143,10 +132,7 @@ namespace BATCHY_FUNCTIONS{
             args:["PIN", "VALUE"],
             name: "gpio_analog_write",
             func: function(arg){
-                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
-                a = a.concat([BATCHYCMDID.REG_SET_SINGLE,2]).concat(intTo4(arg[1]))
-                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
-                return [].concat(a,c)
+                return [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
             }
         }*/
         #if defined(uC)
@@ -196,9 +182,7 @@ namespace BATCHY_FUNCTIONS{
             args:["Duration ms"],
             name: "delay_ms",
             func: function(arg){
-                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
-                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
-                return [].concat(a,c)
+                return [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
             }
         }*/
         #if defined(uC)
@@ -216,9 +200,7 @@ namespace BATCHY_FUNCTIONS{
             args:["Duration us"],
             name: "delay_us",
             func: function(arg){
-                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
-                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
-                return [].concat(a,c)
+                return [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
             }
         }*/
         #if defined(uC)
@@ -255,9 +237,7 @@ namespace BATCHY_FUNCTIONS{
             args:["speed"],
             name: "serial_init",
             func: function(arg){
-                let a = [BATCHYCMDID.REG_SET_SINGLE,1].concat(intTo4(arg[0]))
-                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
-                return [].concat(a,c)
+                return [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
             }
         }*/
         #if defined(uC)
@@ -275,8 +255,7 @@ namespace BATCHY_FUNCTIONS{
             args:[],
             name: "serial_readAllRegister",
             func: function(arg){
-                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
-		        return c
+                return [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
             }
         }*/
         #if defined(uC)
@@ -313,8 +292,7 @@ namespace BATCHY_FUNCTIONS{
             args:[],
             name: "serial_writeAllRegister",
             func: function(arg){
-                let c = [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
-		        return c
+                return [BATCHYCMDID.BATCHY_CMD,0,BATCHYDATA]
             }
         }*/
         #if defined(uC)

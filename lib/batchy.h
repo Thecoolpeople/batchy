@@ -275,7 +275,7 @@ void BATCHY::runCommandSD(int cs_pin, String filename, int bufferSize){
         file.read(buf, bufferSize);
 
         for(batchyCommandNr.number = 0; batchyCommandNr.number < length; batchyCommandNr.number+=6){
-
+            
             if( !((bufferStart.number <= batchyCommandNr.number) && ((bufferStart.number + bufferSize) > batchyCommandNr.number))){
                 bufferStart.number = batchyCommandNr.number;
                 file.seek(bufferStart.number);

@@ -44,17 +44,36 @@ function bytecodeGenerate(){
 	//Returns the number of height from the step in the current function for a variable
 	function getVariableIDFromStack(stack, varname){
 		let stackLength = stack.length
+		let nrIF = 0;
 		for(let i=1; i<=stack.length; i++){
 			let stackEntry = stack[stackLength - i]
-			if(stackEntry.type == "FunctionCall"){
+			if(stackEntry.type == "FunctionCall" && !stackEntry.name.includes("|>>if<<|")){
 				alert("Variable inside Function not found")
 				return 0
+			}else if(stackEntry.type == "FunctionCall" && stackEntry.name.includes("|>>if<<|")){	//count if
+				nrIF++;
 			}else if(stackEntry.type == "VariableDeclaration"){
-				console.log(">>>>>", stackEntry.name, varname)
 				if(stackEntry.name == varname)
-					return i
+					return i - nrIF;
 			}
 		}
+	}
+
+	//validate Statement
+	function validateStatement(value, register, stack){
+		if(typeof value == "number"){
+			bc = [BATCHYCMDID.REG_SET_SINGLE, register, ...intTo4(value)]
+		}else if(typeof value == "string"){
+			let height = getVariableIDFromStack(stack, value)
+			if(height == 0)
+				alert("Variable ("+value+") not found")
+			bc = [BATCHYCMDID.STACK_GET, register, ...intTo4(height)]
+		}else if(typeof value == "object"){
+			bc = value.bc
+			stack = value.stack;
+		}
+
+		return {bc:bc, stack:stack}
 	}
 
 	//clear cache to and incl last function call
@@ -75,60 +94,137 @@ function bytecodeGenerate(){
 	let convertCommand = function(functionName, cmd, stack, astNames){
 		function getParsed(functionName, cmd, stack, astNames, args){
 			if(!args) args = {}
+			
+			let outputReg = args.outputReg || 0;
+			let inputRegL = args.inputRegL || 1;
+			let inputRegR = args.inputRegR || 2;
+
 			switch(cmd.type){
 				case "ExpressionStatement":
 					return getParsed(functionName, cmd.expression, stack, astNames)
 				break;
 
+				case "IfStatement":{
+					let bc = []
+					let condition
+					if(cmd.condition){
+						condition = getParsed(functionName, cmd.condition, stack, {outputReg: outputReg, inputRegL: outputReg, inputRegR: outputReg+1})
+					}else{
+						condition = 0
+					}
+
+					//validate statement
+					let ret = validateStatement(condition, outputReg, stack); bc = [...bc, ...ret.bc]; stack = ret.stack
+
+
+					//body part
+					stack.push({type: "FunctionCall", name: functionName+"|>>if<<|"})
+
+					bc_body = []
+					cmd.body.forEach((cmd)=>{
+						let ret = convertCommand(functionName, cmd, stack, astNames)	//parse single command
+						stack = ret.stack
+						bc_body = bc_body.concat(ret.bc)
+					})
+
+					ret = deleteAllToLastFunctioncallFromStack(stack)
+					stack = ret.stack
+					bc_body = bc_body.concat(ret.bc)	//delete all local vars and co
+
+
+					//else part
+					stack.push({type: "FunctionCall", name: functionName+"|>>if<<|"})
+
+					bc_else = []
+					cmd.else.forEach((cmd)=>{
+						let ret = convertCommand(functionName, cmd, stack, astNames)	//parse single command
+						stack = ret.stack
+						bc_else = bc_else.concat(ret.bc)
+					})
+
+					ret = deleteAllToLastFunctioncallFromStack(stack)
+					stack = ret.stack
+					bc_else = bc_else.concat(ret.bc)	//delete all local vars and co
+
+
+					//if validation
+					bc = [...bc,
+						BATCHYCMDID.CONDITION, outputReg, ...intTo4(0),
+						BATCHYCMDID.JUMP_NORMAL, 0, "+12",0,0,0,					//body part
+						BATCHYCMDID.JUMP_NORMAL, 0, "+"+(12+bc_body.length),0,0,0,	//else part
+						...bc_body,
+						BATCHYCMDID.JUMP_NORMAL, 0, "+"+(6+bc_else.length),0,0,0,  //jump after the else part
+						...bc_else,
+					];
+
+
+					return {bc:bc, stack:stack}
+				}break;
+
 				case "CallExpression":{
+					let bc = []
 					let name = cmd.base.value
 					let parameter = cmd.arguments
 					if(parameter.length != 1 || parameter[0] != null)
-						parameter = parameter.map((c,i)=>{console.log(c,i);return getParsed(functionName, c, stack, astNames)})
+						parameter = parameter.map((c,i)=>{
+							console.log(c,i)
+							let parsed = getParsed(functionName, c, stack, astNames)
+							let ret = validateStatement(parsed, i+1, stack)	//i+1: because we start with register 1 instead of 0
+							stack = ret.stack;
+							return ret.bc
+						})
 					else
 						parameter = []
 
-					console.log(parameter)
 					//check if express is a function call for a user function
 					if(astNames.includes(name)){
 						bc = [BATCHYCMDID.JUMP_JAL, 0, name,0,0,0]	//This will be replaced in the main
-						stack.push({type: "FunctionCall", name: name})
 						//TODO parameter push to stack
 					}else{
 						//this is a function from the namespace
-						bc = lookupFuncs[name](parameter)
+						bc = parameter.flat()
+						bc = [...bc, ...lookupFuncs[name](parameter.length)]
+						console.log(bc)
 						//console.log(expression, parameter, bc)
 					}
 					return {bc:bc, stack:stack}
 				}break;
 
+				case "PrefixExpression":{
+					//TODO   this is called, for example when int a = -1;  because of the minus
+				}break;
+
 				case "BinaryExpression":{
-					let outputReg = args.outputReg || 0;
-					let inputRegL = args.inputRegL || 1;
-					let inputRegR = args.inputRegR || 2;
-					let left = getParsed(functionName, cmd.left, stack, astNames, {outputReg: inputRegL, inputRegL: inputRegL, inputRegR: inputRegL+1})
 					let bc = []
 
-					if(typeof left == "number"){
-						bc = [BATCHYCMDID.REG_SET_SINGLE, inputRegL, ...intTo4(left)]
-					}else if(typeof left == "string"){
-						let height = getVariableIDFromStack(stack, left)
-						bc = [BATCHYCMDID.STACK_GET, inputRegL, ...intTo4(height)]
-					}else if(typeof left == "object"){
-						bc = left.bc
-						stack = left.stack;
+					//Set operator '='
+					if(cmd.operator == "="){
+						let right = getParsed(functionName, cmd.right, stack, astNames, {outputReg: inputRegR, inputRegL: inputRegR, inputRegR: inputRegR+1})
+						//validate statement
+						let ret = validateStatement(right, inputRegR, stack); bc = [...bc, ...ret.bc]; stack = ret.stack
+
+						if(cmd.left.type == "Identifier"){
+							let height = getVariableIDFromStack(stack, cmd.left.value)
+							if(height == 0)
+								alert("Variable ("+cmd.left.value+") not found")
+							bc = [...bc, BATCHYCMDID.STACK_PUT, inputRegR, ...intTo4(height)]
+						}else{
+							alert("There must be only one variable on the left side of '='!")
+						}
+					
+						return {bc:bc, stack:stack}
 					}
+
+					let left = getParsed(functionName, cmd.left, stack, astNames, {outputReg: inputRegL, inputRegL: inputRegL, inputRegR: inputRegL+1})
+					//validate statement
+					let ret = validateStatement(left, inputRegL, stack); bc = [...bc, ...ret.bc]; stack = ret.stack
+					
 					
 					let right = getParsed(functionName, cmd.right, stack, astNames, {outputReg: inputRegR, inputRegL: inputRegR, inputRegR: inputRegR+1})
-					if(typeof right == "number"){
-						bc = [...bc, BATCHYCMDID.REG_SET_SINGLE, inputRegR, ...intTo4(right)]
-					}else if(typeof right == "string"){
-						let height = getVariableIDFromStack(stack, right)
-						bc = [...bc, BATCHYCMDID.STACK_GET, inputRegR, ...intTo4(height)]
-					}else if(typeof right == "object"){
-						bc = [...bc, ...right.bc]
-						stack = right.stack;
-					}
+					//validate statement
+					ret = validateStatement(right, inputRegR, stack); bc = [...bc, ...ret.bc]; stack = ret.stack
+					
+
 					switch(cmd.operator){
 						case '+': bc = [...bc, BATCHYCMDID.MATH_ADD, outputReg, inputRegL,inputRegR,0,0]; break;
 						case '-': bc = [...bc, BATCHYCMDID.MATH_SUB, outputReg, inputRegL,inputRegR,0,0]; break;
@@ -154,11 +250,14 @@ function bytecodeGenerate(){
 				case "VariableDeclaration":{
 					let type = cmd.defType.name
 					if(cmd.defType.name != "int")
-						alter("only ints are supported!")
+						alert("only ints are supported!")
 					
 					let name = cmd.name
 
-					let value = getParsed(functionName, cmd.value, stack, astNames)
+					let value = 0
+					if(cmd.value){
+						value = getParsed(functionName, cmd.value, stack, astNames)
+					}
 					if(typeof value == "number"){	//Numbervalue
 						bc = [BATCHYCMDID.REG_SET_SINGLE, 0, ...intTo4(value),		//set register 1
 							BATCHYCMDID.STACK_PUSH, 0, 0, 0, 0, 0]					//push to stack
@@ -196,25 +295,6 @@ function bytecodeGenerate(){
 		let ret = getParsed(functionName, cmd, stack, astNames)
 		bc = ret.bc
 		stack = ret.stack;
-
-
-		/*
-			case "IfStatement":
-				function Condition(condition){
-					switch(condition.left.type){
-						case "BinaryExpression":
-							Condition(condition.left)
-						break;
-						case "Identifier":
-
-						break;
-					}
-
-					
-				}
-
-			break;
-		}*/
 
 		return {bc: bc, stack: stack}
 	}
@@ -261,12 +341,21 @@ function bytecodeGenerate(){
 	//replace all userFuncs
 	for(let i=0; i<BYTECODE.length; i += 6){
 		if(BYTECODE[i] == BATCHYCMDID.JUMP_NORMAL || BYTECODE[i] == BATCHYCMDID.JUMP_JAL){
-			let startNumber = BYTECODE_FunctionsStart[BYTECODE[i+2]];
-			let startNumberChar = intTo4(startNumber)
-			BYTECODE[i+2] = startNumberChar[0]
-			BYTECODE[i+3] = startNumberChar[1]
-			BYTECODE[i+4] = startNumberChar[2]
-			BYTECODE[i+5] = startNumberChar[3]
+			if(BYTECODE[i+2].includes("+")){
+				let step = parseInt(BYTECODE[i+2].replace("+", ""))
+				let startNumberChar = intTo4(i+step)
+				BYTECODE[i+2] = startNumberChar[0]
+				BYTECODE[i+3] = startNumberChar[1]
+				BYTECODE[i+4] = startNumberChar[2]
+				BYTECODE[i+5] = startNumberChar[3]
+			}else{
+				let startNumber = BYTECODE_FunctionsStart[BYTECODE[i+2]];
+				let startNumberChar = intTo4(startNumber)
+				BYTECODE[i+2] = startNumberChar[0]
+				BYTECODE[i+3] = startNumberChar[1]
+				BYTECODE[i+4] = startNumberChar[2]
+				BYTECODE[i+5] = startNumberChar[3]
+			}
 		}
 	}
 
@@ -281,9 +370,10 @@ function bytecodeGenerate(){
 
 	//display to webpage
 	for(let i=0; i<BYTECODE.length; i++){
+		if(i % 6 == 0)
+			document.getElementById("Cbytecode").innerHTML += '<br><span style="color:blue;">/*'+pad(i,4)+'*/</span> '
 		document.getElementById("Cbytecode").innerHTML += pad(BYTECODE[i],3)+", "
-		if((i+1) % 6 == 0)
-			document.getElementById("Cbytecode").innerHTML += '<br>'
+		
 	}
 
 	return BYTECODE

@@ -32,8 +32,8 @@
                     func = func.substring(func.indexOf('{')+1, func.lastIndexOf('}'))
                     
                     
-                    c = `"${objE.name}": function(arg){`
-                    c += `if(arg.length != ${argslength}){
+                    c = `"${objE.name}": function(arglen){`
+                    c += `if(arglen != ${argslength}){
                         alert("${objE.name} needs ${argslength} arguments: ${objE.args.toString()}")
                         return []
                     }`.replaceAll('  ', '')
