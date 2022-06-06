@@ -191,14 +191,14 @@ inline void BATCHY::runCommandLink(cmd& command){
             break;
         case 18:    //put variable to n'th height of stack from top   (put a register to n'th height of stack from top)
             if((batchyStackNr-paraNumber) >= 0){
-                batchyStack[batchyStackNr-paraNumber].number = batchyReg[command.splited.parameter[0]].number;
+                batchyStack[batchyStackNr-paraNumber].number = batchyReg[command.splited.reg].number;
             }else{
                 //TODO stack error
             }
             break;
         case 19:    //get variable from n'th height of stack from top (put n'th height of stack from top to a register)
             if((batchyStackNr-paraNumber) >= 0){
-                batchyReg[command.splited.parameter[0]].number = batchyStack[batchyStackNr-paraNumber].number;
+                batchyReg[command.splited.reg].number = batchyStack[batchyStackNr-paraNumber].number;
             }else{
                 //TODO stack error
             }
@@ -245,7 +245,7 @@ inline void BATCHY::runCommandLink(cmd& command){
                 //do nothing. the true condition is the next command
             }else{
                 //make a step of +1 Command. the false condition is the upper-next command
-                batchyCommandNr.number = paraNumber + 6;
+                batchyCommandNr.number += 6;
             }
             break;
     }

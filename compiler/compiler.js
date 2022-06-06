@@ -44,19 +44,20 @@ function bytecodeGenerate(){
 	//Returns the number of height from the step in the current function for a variable
 	function getVariableIDFromStack(stack, varname){
 		let stackLength = stack.length
-		let nrIF = 0;
+		let nrInline = 0;
 		for(let i=1; i<=stack.length; i++){
 			let stackEntry = stack[stackLength - i]
-			if(stackEntry.type == "FunctionCall" && !stackEntry.name.includes("|>>if<<|")){
+			if(stackEntry.type == "FunctionCall" && !stackEntry.name.includes("|>>inline<<|")){
 				alert("Variable inside Function not found")
 				return 0
-			}else if(stackEntry.type == "FunctionCall" && stackEntry.name.includes("|>>if<<|")){	//count if
-				nrIF++;
+			}else if(stackEntry.type == "FunctionCall" && stackEntry.name.includes("|>>inline<<|")){	//count if
+				nrInline++;
 			}else if(stackEntry.type == "VariableDeclaration"){
 				if(stackEntry.name == varname)
-					return i - nrIF;
+					return i - nrInline;
 			}
 		}
+		return 0
 	}
 
 	//validate Statement
@@ -83,6 +84,7 @@ function bytecodeGenerate(){
 		for(let i=1; i<=stackLength; i++){
 			let stackEntry = stack[stackLength - i]
 			if(stackEntry.type == "FunctionCall"){
+				stack.pop()
 				break;
 			}
 			stack.pop()
@@ -118,7 +120,7 @@ function bytecodeGenerate(){
 
 
 					//body part
-					stack.push({type: "FunctionCall", name: functionName+"|>>if<<|"})
+					stack.push({type: "FunctionCall", name: functionName+"|>>inline<<|"})
 
 					bc_body = []
 					cmd.body.forEach((cmd)=>{
@@ -133,14 +135,16 @@ function bytecodeGenerate(){
 
 
 					//else part
-					stack.push({type: "FunctionCall", name: functionName+"|>>if<<|"})
+					stack.push({type: "FunctionCall", name: functionName+"|>>inline<<|"})
 
 					bc_else = []
-					cmd.else.forEach((cmd)=>{
-						let ret = convertCommand(functionName, cmd, stack, astNames)	//parse single command
-						stack = ret.stack
-						bc_else = bc_else.concat(ret.bc)
-					})
+					if(cmd.else){
+						cmd.else.forEach((cmd)=>{
+							let ret = convertCommand(functionName, cmd, stack, astNames)	//parse single command
+							stack = ret.stack
+							bc_else = bc_else.concat(ret.bc)
+						})
+					}
 
 					ret = deleteAllToLastFunctioncallFromStack(stack)
 					stack = ret.stack
@@ -161,14 +165,83 @@ function bytecodeGenerate(){
 					return {bc:bc, stack:stack}
 				}break;
 
+				case "ForStatement":{
+					//for(cmd.init; cmd.condition; cmd.step){
+					//	cmd.body
+					//}
+					let bc = []
+					let ret = false
+					let init = 0
+					let condition = 0
+
+
+					//INIT
+					stack.push({type: "FunctionCall", name: functionName+"|>>inline<<|"})
+					if(cmd.init){
+						init = getParsed(functionName, cmd.init, stack, {outputReg: outputReg, inputRegL: outputReg, inputRegR: outputReg+1})
+					}
+					
+					ret = validateStatement(init, outputReg, stack); bcInit = ret.bc; stack = ret.stack
+
+
+					//CONDITION
+					if(cmd.condition){
+						condition = getParsed(functionName, cmd.condition, stack, {outputReg: outputReg, inputRegL: outputReg, inputRegR: outputReg+1})
+					}
+					//validate statement
+					ret = validateStatement(condition, outputReg, stack); bcCondition = ret.bc; stack = ret.stack
+
+
+					//BODY
+					stack.push({type: "FunctionCall", name: functionName+"|>>inline<<|"})
+					bcBody = []
+					cmd.body.forEach((cmd)=>{
+						let ret = convertCommand(functionName, cmd, stack, astNames)	//parse single command
+						stack = ret.stack
+						bcBody = bcBody.concat(ret.bc)
+					})
+					ret = deleteAllToLastFunctioncallFromStack(stack)
+					stack = ret.stack
+					bcBodyVarsDelete = ret.bc	//delete all local vars and co
+
+
+
+					//STEP
+					if(cmd.step){
+						step = getParsed(functionName, cmd.step, stack, {outputReg: outputReg, inputRegL: outputReg, inputRegR: outputReg+1})
+					}
+					//validate statement
+					ret = validateStatement(step, outputReg, stack); bcStep = ret.bc; stack = ret.stack
+
+					
+					bc = [
+						...bcInit,
+						...bcCondition,
+						BATCHYCMDID.CONDITION, outputReg, ...intTo4(0),
+						BATCHYCMDID.JUMP_NORMAL, 0, "+12",0,0,0,					//body part
+						BATCHYCMDID.JUMP_NORMAL, 0, "+"+(12+bcBody.length+bcStep.length+bcBodyVarsDelete.length),0,0,0,	//else part (jump to the end of the for)
+						...bcBody,	//the for body
+						...bcBodyVarsDelete, //delete the body variable creates
+						...bcStep,
+						BATCHYCMDID.JUMP_NORMAL, 0, "+-"+(18+bcCondition.length+bcBody.length+bcStep.length+bcBodyVarsDelete.length),0,0,0, //jump back to the condition
+						//delete all local vars, look below
+					]
+
+
+					ret = deleteAllToLastFunctioncallFromStack(stack)
+					stack = ret.stack
+					bc = bc.concat(ret.bc)	//delete all local vars and co
+
+					return {bc:bc, stack:stack}
+				}break;
+				
 				case "CallExpression":{
 					let bc = []
 					let name = cmd.base.value
 					let parameter = cmd.arguments
 					if(parameter.length != 1 || parameter[0] != null)
 						parameter = parameter.map((c,i)=>{
-							console.log(c,i)
-							let parsed = getParsed(functionName, c, stack, astNames)
+							let parsed = getParsed(functionName, c, stack, astNames, {outputReg:i+1, inputRegL: i+1, inputRegR:i+2})
 							let ret = validateStatement(parsed, i+1, stack)	//i+1: because we start with register 1 instead of 0
 							stack = ret.stack;
 							return ret.bc
@@ -184,7 +257,6 @@ function bytecodeGenerate(){
 						//this is a function from the namespace
 						bc = parameter.flat()
 						bc = [...bc, ...lookupFuncs[name](parameter.length)]
-						console.log(bc)
 						//console.log(expression, parameter, bc)
 					}
 					return {bc:bc, stack:stack}
@@ -373,6 +445,16 @@ function bytecodeGenerate(){
 		if(i % 6 == 0)
 			document.getElementById("Cbytecode").innerHTML += '<br><span style="color:blue;">/*'+pad(i,4)+'*/</span> '
 		document.getElementById("Cbytecode").innerHTML += pad(BYTECODE[i],3)+", "
+		if((i+1) % 6 == 0){
+			let f = function(id){
+				for(e in BATCHYCMDID){
+					if (BATCHYCMDID[e] == id)
+						return e
+				}
+				return "unknown"
+			}
+			document.getElementById("Cbytecode").innerHTML += '// '+f(BYTECODE[i-5])
+		}
 		
 	}
 
