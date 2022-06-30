@@ -250,17 +250,17 @@ inline void BATCHY::runCommandLink(cmd& command){
             break;
     }
 }
-void BATCHY::runCommand(cmd command){
+inline void BATCHY::runCommand(cmd command){
     runCommandLink(command);
 }
-void BATCHY::runCommandString(char* cmdstr, uint32_t length){
+inline void BATCHY::runCommandString(char* cmdstr, uint32_t length){
     for(batchyCommandNr.number = 0; batchyCommandNr.number < length; batchyCommandNr.number+=6){
         runCommandLink(*((cmd*)(cmdstr+batchyCommandNr.number)));
     }
 }
 
 #ifdef BATCHY_SD
-void BATCHY::runCommandSD(int cs_pin, String filename, int bufferSize){
+inline void BATCHY::runCommandSD(int cs_pin, String filename, int bufferSize){
     if (!SD.begin(cs_pin)){
         return;
     }

@@ -1,7 +1,15 @@
+#undef _GLIBCXX_DEBUG                // disable run-time bound checking, etc
+#pragma GCC optimize("Ofast,inline") // Ofast = O3,fast-math,allow-store-data-races,no-protect-parens
+
+#pragma GCC target("bmi,bmi2,lzcnt,popcnt")                      // bit manipulation
+#pragma GCC target("aes,pclmul,rdrnd")                           // encryption
+#pragma GCC target("avx,avx2,f16c,fma,sse3,ssse3,sse4.1,sse4.2") // SIMD
+
 #include "iostream"
 #include <iomanip>
 
 #include "batchy.h"
+#include <chrono>
 
 std::ostream hexcout (std::cout.rdbuf());
 
@@ -37,79 +45,30 @@ int main(){
 	
 	char cmdstr[] = {
 /*   0*/  20,   0,   6,   0,   0,   0, // JUMP_NORMAL
-/*   6*/   2,   0,   2,   0,   0,   0, // REG_SET_SINGLE
+/*   6*/   2,   0,   0,   0,   0,   0, // REG_SET_SINGLE
 /*  12*/  16,   0,   0,   0,   0,   0, // STACK_PUSH
-/*  18*/  19,   1,   1,   0,   0,   0, // STACK_GET
-/*  24*/   2,   2,   1,   0,   0,   0, // REG_SET_SINGLE
-/*  30*/  30,   0,   1,   0,   0,   0, // BATCHY_CMD
-/*  36*/  19,   1,   1,   0,   0,   0, // STACK_GET
-/*  42*/   2,   2,   1,   0,   0,   0, // REG_SET_SINGLE
-/*  48*/  30,   0,   2,   0,   0,   0, // BATCHY_CMD
-/*  54*/   2,   1, 244,   1,   0,   0, // REG_SET_SINGLE
-/*  60*/  30,   0,  10,   0,   0,   0, // BATCHY_CMD
-/*  66*/  19,   1,   1,   0,   0,   0, // STACK_GET
-/*  72*/   2,   2,   0,   0,   0,   0, // REG_SET_SINGLE
-/*  78*/  30,   0,   2,   0,   0,   0, // BATCHY_CMD
-/*  84*/   2,   0,   0,   0,   0,   0, // REG_SET_SINGLE
-/*  90*/  16,   0,   0,   0,   0,   0, // STACK_PUSH
-/*  96*/   2,   0,   1,   0,   0,   0, // REG_SET_SINGLE
-/* 102*/  16,   0,   0,   0,   0,   0, // STACK_PUSH
-/* 108*/   2,   0,   0,   0,   0,   0, // REG_SET_SINGLE
-/* 114*/  16,   0,   0,   0,   0,   0, // STACK_PUSH
-/* 120*/  19,   1,   1,   0,   0,   0, // STACK_GET
-/* 126*/   2,   2,   0,   0,   0,   0, // REG_SET_SINGLE
-/* 132*/   8,   0,   1,   2,   0,   0, // MATH_EQ
-/* 138*/  31,   0,   0,   0,   0,   0, // CONDITION
-/* 144*/  20,   0, 156,   0,   0,   0, // JUMP_NORMAL
-/* 150*/  20,   0, 158,   1,   0,   0, // JUMP_NORMAL
-/* 156*/  19,   1,   4,   0,   0,   0, // STACK_GET
-/* 162*/   2,   2,   1,   0,   0,   0, // REG_SET_SINGLE
-/* 168*/  30,   0,   2,   0,   0,   0, // BATCHY_CMD
-/* 174*/  19,   1,   3,   0,   0,   0, // STACK_GET
-/* 180*/  30,   0,  10,   0,   0,   0, // BATCHY_CMD
-/* 186*/  19,   1,   4,   0,   0,   0, // STACK_GET
-/* 192*/   2,   2,   0,   0,   0,   0, // REG_SET_SINGLE
-/* 198*/  30,   0,   2,   0,   0,   0, // BATCHY_CMD
-/* 204*/   2,   1, 232,   3,   0,   0, // REG_SET_SINGLE
-/* 210*/  19,   2,   3,   0,   0,   0, // STACK_GET
-/* 216*/   4,   1,   1,   2,   0,   0, // MATH_SUB
-/* 222*/  30,   0,  10,   0,   0,   0, // BATCHY_CMD
-/* 228*/  19,   1,   3,   0,   0,   0, // STACK_GET
-/* 234*/   2,   2, 232,   3,   0,   0, // REG_SET_SINGLE
-/* 240*/  14,   0,   1,   2,   0,   0, // MATH_GREATEREQ
-/* 246*/  31,   0,   0,   0,   0,   0, // CONDITION
-/* 252*/  20,   0,   8,   1,   0,   0, // JUMP_NORMAL
-/* 258*/  20,   0,  50,   1,   0,   0, // JUMP_NORMAL
-/* 264*/  19,   2,   2,   0,   0,   0, // STACK_GET
-/* 270*/   2,   3,   1,   0,   0,   0, // REG_SET_SINGLE
-/* 276*/   3,   2,   2,   3,   0,   0, // MATH_ADD
-/* 282*/   2,   3,   2,   0,   0,   0, // REG_SET_SINGLE
-/* 288*/   7,   2,   2,   3,   0,   0, // MATH_MOD
-/* 294*/  18,   2,   2,   0,   0,   0, // STACK_PUT
-/* 300*/  20,   0,  50,   1,   0,   0, // JUMP_NORMAL
-/* 306*/  19,   1,   2,   0,   0,   0, // STACK_GET
-/* 312*/   2,   2,   1,   0,   0,   0, // REG_SET_SINGLE
-/* 318*/   8,   0,   1,   2,   0,   0, // MATH_EQ
-/* 324*/  31,   0,   0,   0,   0,   0, // CONDITION
-/* 330*/  20,   0,  86,   1,   0,   0, // JUMP_NORMAL
-/* 336*/  20,   0, 116,   1,   0,   0, // JUMP_NORMAL
-/* 342*/  19,   2,   3,   0,   0,   0, // STACK_GET
-/* 348*/   2,   3,  10,   0,   0,   0, // REG_SET_SINGLE
-/* 354*/   3,   2,   2,   3,   0,   0, // MATH_ADD
-/* 360*/  18,   2,   3,   0,   0,   0, // STACK_PUT
-/* 366*/  20,   0, 140,   1,   0,   0, // JUMP_NORMAL
-/* 372*/  19,   2,   3,   0,   0,   0, // STACK_GET
-/* 378*/   2,   3,  10,   0,   0,   0, // REG_SET_SINGLE
-/* 384*/   4,   2,   2,   3,   0,   0, // MATH_SUB
-/* 390*/  18,   2,   3,   0,   0,   0, // STACK_PUT
-/* 396*/  19,   2,   1,   0,   0,   0, // STACK_GET
-/* 402*/  18,   2,   1,   0,   0,   0, // STACK_PUT
-/* 408*/  20,   0, 120,   0,   0,   0, // JUMP_NORMAL
-/* 414*/  17,   0,   0,   0,   0,   0, // STACK_POP
+/*  18*/   2,   0,   0,   0,   0,   0, // REG_SET_SINGLE
+/*  24*/  16,   0,   0,   0,   0,   0, // STACK_PUSH
+/*  30*/  19,   1,   1,   0,   0,   0, // STACK_GET
+/*  36*/   2,   2,  16,  39,   0,   0, // REG_SET_SINGLE
+/*  42*/  13,   0,   1,   2,   0,   0, // MATH_SMALLER
+/*  48*/  31,   0,   0,   0,   0,   0, // CONDITION
+/*  54*/  20,   0,  66,   0,   0,   0, // JUMP_NORMAL
+/*  60*/  20,   0,  96,   0,   0,   0, // JUMP_NORMAL
+/*  66*/  19,   2,   1,   0,   0,   0, // STACK_GET
+/*  72*/   2,   3,   1,   0,   0,   0, // REG_SET_SINGLE
+/*  78*/   3,   2,   2,   3,   0,   0, // MATH_ADD
+/*  84*/  18,   2,   1,   0,   0,   0, // STACK_PUT
+/*  90*/  20,   0,  30,   0,   0,   0, // JUMP_NORMAL
+/*  96*/  17,   0,   0,   0,   0,   0, // STACK_POP
 	};
+	
+	auto start_time = std::chrono::high_resolution_clock::now();
 	batchy.runCommandString(cmdstr, sizeof(cmdstr));
+	auto end_time = std::chrono::high_resolution_clock::now();
 	
-	
+	auto time = end_time - start_time;
+	std::cout << time/std::chrono::microseconds(1) << "microseconds";
 	
 	getchar();
 }
